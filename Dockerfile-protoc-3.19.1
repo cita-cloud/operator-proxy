@@ -1,0 +1,15 @@
+FROM golang:1.17
+WORKDIR /src
+ENV GO111MODULE=on
+
+
+RUN apt-get update && apt-get install -y unzip \
+    && cd /usr/local/bin \
+    && wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.1/protoc-3.19.1-linux-x86_64.zip \
+    && unzip protoc-3.19.1-linux-x86_64.zip -d /usr/local/bin && mv bin/protoc /usr/local/bin
+
+RUN mkdir -p $GOPATH/src/github.com/golang/protobuf \
+    && cd $GOPATH/src/github.com/golang/protobuf  \
+    && git clone https://github.com/golang/protobuf . \
+    && git fetch && git checkout tags/v1.5.2 \
+    && go build -o /usr/local/bin/protoc-gen-go ./protoc-gen-go/

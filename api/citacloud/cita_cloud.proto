@@ -1,0 +1,7 @@
+syntax = "proto3";
+package citacloud;
+option go_package = "github.com/cita-cloud/operator-proxy/api/citacloud";
+
+message CreateChainRequest {
+  string name = 1;
+}

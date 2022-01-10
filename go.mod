@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/cita-cloud/cita-cloud-operator v0.0.0-20211209075225-689de79199e4
+	github.com/olekukonko/tablewriter v0.0.5
 	github.com/spf13/cobra v1.3.0
 	google.golang.org/grpc v1.43.0
 	google.golang.org/protobuf v1.27.1
@@ -29,6 +30,7 @@ require (
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect

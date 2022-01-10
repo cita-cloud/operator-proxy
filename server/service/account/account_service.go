@@ -43,7 +43,9 @@ func (a accountServer) ListAccount(ctx context.Context, request *pb.ListAccountR
 	accountCrList := &citacloudv1.AccountList{}
 	accountCrOpts := []client.ListOption{
 		client.InNamespace(request.GetNamespace()),
-		client.MatchingFields{"spec.chain": request.GetChain()},
+	}
+	if request.GetChain() != "" {
+		accountCrOpts = append(accountCrOpts, client.MatchingFields{"spec.chain": request.GetChain()})
 	}
 	if err := kubeapi.K8sClient.List(ctx, accountCrList, accountCrOpts...); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to list account cr", err)

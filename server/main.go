@@ -4,13 +4,14 @@ import (
 	"log"
 	"net"
 
-	accountpb "github.com/cita-cloud/operator-proxy/api/account"
-	citacloudpb "github.com/cita-cloud/operator-proxy/api/citacloud"
-	k8sclient "github.com/cita-cloud/operator-proxy/server/kubeapi"
-	"github.com/cita-cloud/operator-proxy/server/service"
-	accountservice "github.com/cita-cloud/operator-proxy/server/service/account"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+
+	accountpb "github.com/cita-cloud/operator-proxy/api/account"
+	chainpb "github.com/cita-cloud/operator-proxy/api/chain"
+	k8sclient "github.com/cita-cloud/operator-proxy/server/kubeapi"
+	accountservice "github.com/cita-cloud/operator-proxy/server/service/account"
+	chainservice "github.com/cita-cloud/operator-proxy/server/service/chain"
 )
 
 const (
@@ -29,8 +30,8 @@ func main() {
 	}
 	s := grpc.NewServer()
 
-	ccServer := service.NewCitaCloudServer()
-	citacloudpb.RegisterCitaCloudServiceServer(s, ccServer)
+	ccServer := chainservice.NewChainServer()
+	chainpb.RegisterChainServiceServer(s, ccServer)
 
 	accountServer := accountservice.NewAccountServer()
 	accountpb.RegisterAccountServiceServer(s, accountServer)

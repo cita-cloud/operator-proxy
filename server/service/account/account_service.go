@@ -62,7 +62,7 @@ func (a accountServer) ListAccount(ctx context.Context, request *pb.ListAccountR
 		}
 		accountList = append(accountList, ac)
 	}
-	return &pb.AccountList{Account: accountList}, status.New(codes.OK, "").Err()
+	return &pb.AccountList{Accounts: accountList}, status.New(codes.OK, "").Err()
 }
 
 func convertSpecToProto(role citacloudv1.Role) pb.Role {

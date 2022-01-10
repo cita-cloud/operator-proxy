@@ -28,7 +28,7 @@ message ListAccountRequest {
 }
 
 message AccountList {
-  repeated Account account = 1;
+  repeated Account accounts = 1;
 }
 
 service AccountService {

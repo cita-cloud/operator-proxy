@@ -27,7 +27,7 @@ func NewAccountCommand() *cobra.Command {
 
 func NewAccountCreateCommand() *cobra.Command {
 	cc := &cobra.Command{
-		Use:   "create <name>",
+		Use:   "create <account name>",
 		Short: "Create a node account for chain",
 
 		Run: accountCreateCommandFunc,

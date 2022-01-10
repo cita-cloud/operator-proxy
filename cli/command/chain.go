@@ -19,7 +19,7 @@ var (
 func NewChainCommand() *cobra.Command {
 	cc := &cobra.Command{
 		Use:   "chain <subcommand>",
-		Short: "chain related commands",
+		Short: "Chain related commands",
 	}
 
 	cc.AddCommand(NewChainInitCommand())

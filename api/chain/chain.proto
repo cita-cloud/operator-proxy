@@ -46,8 +46,13 @@ message ChainList {
   repeated ChainSimpleResponse chains = 1;
 }
 
+message ChainOnlineRequest {
+  string name = 1;
+  string namespace = 2;
+}
 
 service ChainService {
   rpc Init(Chain) returns (ChainSimpleResponse);
   rpc List(ListChainRequest) returns (ChainList);
+  rpc Online(ChainOnlineRequest) returns (ChainSimpleResponse);
 }

@@ -4,11 +4,13 @@ import (
 	"context"
 
 	citacloudv1 "github.com/cita-cloud/cita-cloud-operator/api/v1"
-	pb "github.com/cita-cloud/operator-proxy/api/chain"
-	"github.com/cita-cloud/operator-proxy/server/kubeapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	pb "github.com/cita-cloud/operator-proxy/api/chain"
+	"github.com/cita-cloud/operator-proxy/server/kubeapi"
 )
 
 var _ pb.ChainServiceServer = &chainServer{}
@@ -28,6 +30,7 @@ func (c chainServer) Init(ctx context.Context, chain *pb.Chain) (*pb.ChainSimple
 	chainConfig.Spec.EnableTLS = chain.GetEnableTls()
 	chainConfig.Spec.ConsensusType = citacloudv1.ConsensusType(chain.GetConsensusType())
 	// default status is Publicizing
+	chainConfig.Spec.Action = citacloudv1.Publicizing
 	chainConfig.Spec.NetworkImage = chain.GetNetworkImage()
 	chainConfig.Spec.ConsensusImage = chain.GetConsensusImage()
 	chainConfig.Spec.ExecutorImage = chain.GetExecutorImage()
@@ -64,6 +67,25 @@ func (c chainServer) List(ctx context.Context, request *pb.ListChainRequest) (*p
 		chainList = append(chainList, c)
 	}
 	return &pb.ChainList{Chains: chainList}, status.New(codes.OK, "").Err()
+}
+
+func (c chainServer) Online(ctx context.Context, request *pb.ChainOnlineRequest) (*pb.ChainSimpleResponse, error) {
+	chain := &citacloudv1.ChainConfig{}
+	if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: request.Name, Namespace: request.Namespace}, chain); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get chain cr", err)
+	}
+	if chain.Spec.Action != citacloudv1.Online {
+		chain.Spec.Action = citacloudv1.Online
+		if err := kubeapi.K8sClient.Update(ctx, chain); err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to update chain online", err)
+		}
+	}
+
+	return &pb.ChainSimpleResponse{
+		Name:      request.Name,
+		Namespace: request.Namespace,
+		Status:    pb.Status_Online,
+	}, status.New(codes.OK, "").Err()
 }
 
 func NewChainServer() pb.ChainServiceServer {

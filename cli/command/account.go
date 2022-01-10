@@ -16,7 +16,7 @@ var (
 func NewAccountCommand() *cobra.Command {
 	cc := &cobra.Command{
 		Use:   "account <subcommand>",
-		Short: "account related commands",
+		Short: "Account related commands",
 	}
 
 	cc.AddCommand(NewAccountCreateCommand())

@@ -9,9 +9,11 @@ import (
 
 	accountpb "github.com/cita-cloud/operator-proxy/api/account"
 	chainpb "github.com/cita-cloud/operator-proxy/api/chain"
+	nodepb "github.com/cita-cloud/operator-proxy/api/node"
 	k8sclient "github.com/cita-cloud/operator-proxy/server/kubeapi"
 	accountservice "github.com/cita-cloud/operator-proxy/server/service/account"
 	chainservice "github.com/cita-cloud/operator-proxy/server/service/chain"
+	nodeservice "github.com/cita-cloud/operator-proxy/server/service/node"
 )
 
 const (
@@ -30,11 +32,14 @@ func main() {
 	}
 	s := grpc.NewServer()
 
-	ccServer := chainservice.NewChainServer()
-	chainpb.RegisterChainServiceServer(s, ccServer)
+	chainServer := chainservice.NewChainServer()
+	chainpb.RegisterChainServiceServer(s, chainServer)
 
 	accountServer := accountservice.NewAccountServer()
 	accountpb.RegisterAccountServiceServer(s, accountServer)
+
+	nodeServer := nodeservice.NewNodeServer()
+	nodepb.RegisterNodeServiceServer(s, nodeServer)
 
 	log.Printf("Starting gRPC listener on port " + port)
 

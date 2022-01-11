@@ -41,7 +41,13 @@ message NodeList {
   repeated Node nodes = 1;
 }
 
+message NodeStartRequest {
+  string name = 1;
+  string namespace = 2;
+}
+
 service NodeService {
   rpc Init(Node) returns (NodeSimpleResponse);
   rpc List(ListNodeRequest) returns (NodeList);
+  rpc Start(NodeStartRequest) returns (NodeSimpleResponse);
 }

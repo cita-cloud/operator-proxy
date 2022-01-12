@@ -51,6 +51,7 @@ func InitK8sClient() error {
 	k8sManager, err := ctrl.NewManager(config, ctrl.Options{
 		Scheme:         scheme,
 		LeaderElection: false,
+		MetricsBindAddress: "0",
 	})
 	if err != nil {
 		return err

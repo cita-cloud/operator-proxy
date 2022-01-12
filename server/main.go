@@ -8,10 +8,12 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	accountpb "github.com/cita-cloud/operator-proxy/api/account"
+	allinonepb "github.com/cita-cloud/operator-proxy/api/allinone"
 	chainpb "github.com/cita-cloud/operator-proxy/api/chain"
 	nodepb "github.com/cita-cloud/operator-proxy/api/node"
 	k8sclient "github.com/cita-cloud/operator-proxy/server/kubeapi"
 	accountservice "github.com/cita-cloud/operator-proxy/server/service/account"
+	allinoneservice "github.com/cita-cloud/operator-proxy/server/service/allinone"
 	chainservice "github.com/cita-cloud/operator-proxy/server/service/chain"
 	nodeservice "github.com/cita-cloud/operator-proxy/server/service/node"
 )
@@ -40,6 +42,9 @@ func main() {
 
 	nodeServer := nodeservice.NewNodeServer()
 	nodepb.RegisterNodeServiceServer(s, nodeServer)
+
+	allInOneServer := allinoneservice.NewAllInOneServer()
+	allinonepb.RegisterAllInOneServiceServer(s, allInOneServer)
 
 	log.Printf("Starting gRPC listener on port " + port)
 

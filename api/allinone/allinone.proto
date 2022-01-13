@@ -23,6 +23,7 @@ message AllInOneCreateRequest {
   int32 nodeCount = 16;
   int64 storageSize = 17;
   string storageClassName = 18;
+  string logLevel = 19;
 }
 
 message AllInOneCreateResponse {

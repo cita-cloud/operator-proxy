@@ -30,6 +30,7 @@ func (n nodeServer) Init(ctx context.Context, node *pb.Node) (*pb.NodeSimpleResp
 	nodeCr.Spec.ChainName = node.GetChain()
 	nodeCr.Spec.StorageSize = pointer.Int64(node.GetStorageSize())
 	nodeCr.Spec.StorageClassName = pointer.String(node.GetStorageClassName())
+	nodeCr.Spec.LogLevel = convertProtoToSpec(node.GetLogLevel())
 	nodeCr.Spec.Action = citacloudv1.NodeInitialize
 
 	err := kubeapi.K8sClient.Create(ctx, nodeCr)
@@ -92,4 +93,14 @@ func (n nodeServer) Start(ctx context.Context, request *pb.NodeStartRequest) (*p
 
 func NewNodeServer() pb.NodeServiceServer {
 	return &nodeServer{}
+}
+
+// todo modify
+func convertProtoToSpec(logLevel string) citacloudv1.LogLevel {
+	if logLevel == "info" {
+		return citacloudv1.Info
+	} else if logLevel == "warn" {
+		return citacloudv1.Warn
+	}
+	return ""
 }

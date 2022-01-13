@@ -32,3 +32,12 @@ func TestUuid(t *testing.T) {
 	sum := h.Sum(nil)
 	fmt.Printf("digest value is: %x\n",sum)
 }
+
+func Test_generateChainId(t *testing.T) {
+	a := generateChainId("hello")
+	b := fmt.Sprintf("%x", a)
+	fmt.Printf("哈希结果为：%x", a)
+	fmt.Printf("哈希结果为：%s", b)
+	t.Log(a)
+	t.Log(string(a))
+}

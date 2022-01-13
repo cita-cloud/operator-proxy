@@ -12,6 +12,7 @@ message Node {
   string chain = 7;
   int64 storageSize = 13;
   string storageClassName = 14;
+  string logLevel = 15;
 }
 
 enum Status {

@@ -2,7 +2,7 @@ package allinone
 
 import (
 	"context"
-	"sync"
+	"fmt"
 	"time"
 
 	citacloudv1 "github.com/cita-cloud/cita-cloud-operator/api/v1"
@@ -76,6 +76,9 @@ func setDefault(request *pb.AllInOneCreateRequest) {
 	}
 	if request.GetStorageClassName() == "" {
 		request.StorageClassName = "nas-client-provisioner"
+	}
+	if request.GetLogLevel() == "" {
+		request.LogLevel = "info"
 	}
 }
 
@@ -163,16 +166,18 @@ func (a allInOneServer) Create(ctx context.Context, request *pb.AllInOneCreateRe
 
 	// wait chain online
 	err = wait.Poll(3*time.Second, 30*time.Second, func() (done bool, err error) {
-		return a.checkChainOnline(ctx, request.GetNamespace(), request.GetName(), request.GetNodeCount())
+		return a.checkChainOnline(ctx, request.GetNamespace(), request.GetName())
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to wait chain online: %v", err)
 	}
 
+	nodeNameList := make([]string, 0)
 	for _, nodeAccountName := range nodeAccountNameList {
+		nodeName := generateAccountOrNodeName(request.GetName())
 		// create node
 		nodeReq := &nodepb.Node{
-			Name:      generateAccountOrNodeName(request.GetName()),
+			Name:      nodeName,
 			Namespace: request.GetNamespace(),
 			// todo modify this field
 			Cluster:          "k8s-1",
@@ -180,25 +185,24 @@ func (a allInOneServer) Create(ctx context.Context, request *pb.AllInOneCreateRe
 			Chain:            request.GetName(),
 			StorageSize:      request.GetStorageSize(),
 			StorageClassName: request.GetStorageClassName(),
+			LogLevel:         request.GetLogLevel(),
 		}
 		_, err = nodesvc.NewNodeServer().Init(ctx, nodeReq)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "failed to init node: %v", err)
 		}
+		nodeNameList = append(nodeNameList, nodeName)
 	}
 
-	// wait all node Initialized
-	// 先查状态为init
-	var wg sync.WaitGroup
-	for i := 1; i <= int(request.GetNodeCount()); i++ {
-		wg.Add(1)
-		go func() {
-			// 等待
-			// todo
-			wg.Done()
-		}()
+	// concurrent start node
+	g, _ := NewGroup(ctx)
+	for _, nn := range nodeNameList {
+		g.GoStartNode(a.startNode, ctx, request.GetNamespace(), nn)
 	}
-	wg.Wait()
+	err = g.Wait()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to start node: %v", err)
+	}
 
 	return &pb.AllInOneCreateResponse{
 		Name:      request.GetName(),
@@ -217,13 +221,50 @@ func (a allInOneServer) checkChainAccount(ctx context.Context, namespace, name s
 	return false, nil
 }
 
-func (a allInOneServer) checkChainOnline(ctx context.Context, namespace, name string, nodeCount int32) (bool, error) {
+func (a allInOneServer) checkChainOnline(ctx context.Context, namespace, name string) (bool, error) {
 	chain := &citacloudv1.ChainConfig{}
 	if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, chain); err != nil {
 		return false, nil
 	}
 	if chain.Status.Status == citacloudv1.Online {
 		return true, nil
+	}
+	return false, nil
+}
+
+func (a allInOneServer) startNode(ctx context.Context, namespace, name string) error {
+	err := wait.Poll(3*time.Second, 60*time.Second, func() (done bool, err error) {
+		return a.checkNodeInitialized(ctx, namespace, name)
+	})
+	if err != nil {
+		return err
+	}
+	startNodeReq := &nodepb.NodeStartRequest{
+		Name:      name,
+		Namespace: namespace,
+	}
+	_, err = nodesvc.NewNodeServer().Start(ctx, startNodeReq)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a allInOneServer) checkNodeInitialized(ctx context.Context, namespace, name string) (bool, error) {
+	node := &citacloudv1.ChainNode{}
+	if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, node); err != nil {
+		return false, nil
+	}
+	chain := &citacloudv1.ChainConfig{}
+	if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: node.Spec.ChainName, Namespace: namespace}, chain); err != nil {
+		return false, nil
+	}
+	if node.Status.Status == citacloudv1.NodeInitialized {
+		if _, exist := chain.Status.NodeInfoMap[name]; exist {
+			return true, nil
+		} else {
+			return false, nil
+		}
 	}
 	return false, nil
 }
@@ -236,7 +277,7 @@ func generateChainId(name string) string {
 	h := sm3.New()
 	h.Write([]byte(name))
 	sum := h.Sum(nil)
-	return string(sum)
+	return fmt.Sprintf("%x", sum)
 }
 
 func generateAccountOrNodeName(name string) string {
@@ -245,6 +286,6 @@ func generateAccountOrNodeName(name string) string {
 }
 
 func generateAccountPassword() (string, error) {
-	accountPwd, err := password.Generate(16, 4, 4, false, false)
-	return accountPwd, err
+	_, err := password.Generate(16, 4, 4, false, false)
+	return "123456", err
 }

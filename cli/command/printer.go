@@ -2,6 +2,7 @@ package command
 
 import (
 	accountpb "github.com/cita-cloud/operator-proxy/api/account"
+	allinonepb "github.com/cita-cloud/operator-proxy/api/allinone"
 	chainpb "github.com/cita-cloud/operator-proxy/api/chain"
 )
 
@@ -13,6 +14,9 @@ type printer interface {
 	// account
 	CreateAccount(account *accountpb.Account)
 	ListAccount(list *accountpb.AccountList)
+
+	// all in one
+	CreateAllInOne(response *allinonepb.AllInOneCreateResponse)
 }
 
 func NewPrinter(printerType string) printer {

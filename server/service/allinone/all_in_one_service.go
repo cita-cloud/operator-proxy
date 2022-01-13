@@ -80,6 +80,9 @@ func setDefault(request *pb.AllInOneCreateRequest) {
 	if request.GetLogLevel() == "" {
 		request.LogLevel = "info"
 	}
+	if request.GetNodeCount() == 0 {
+		request.NodeCount = 3
+	}
 }
 
 func (a allInOneServer) Create(ctx context.Context, request *pb.AllInOneCreateRequest) (*pb.AllInOneCreateResponse, error) {

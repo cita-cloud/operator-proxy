@@ -5,10 +5,15 @@ import (
 	"strings"
 
 	accountpb "github.com/cita-cloud/operator-proxy/api/account"
+	pb "github.com/cita-cloud/operator-proxy/api/allinone"
 	chainpb "github.com/cita-cloud/operator-proxy/api/chain"
 )
 
 type simplePrinter struct{}
+
+func (s *simplePrinter) CreateAllInOne(response *pb.AllInOneCreateResponse) {
+	fmt.Println(fmt.Sprintf("create chain [%s/%s] success by one click", response.GetNamespace(), response.GetName()))
+}
 
 func (s *simplePrinter) ListAccount(list *accountpb.AccountList) {
 	_, rows := makeAccountListTable(list)

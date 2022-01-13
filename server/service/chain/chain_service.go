@@ -6,7 +6,6 @@ import (
 	citacloudv1 "github.com/cita-cloud/cita-cloud-operator/api/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -38,7 +37,6 @@ func (c chainServer) Init(ctx context.Context, chain *pb.Chain) (*pb.ChainSimple
 	chainConfig.Spec.StorageImage = chain.GetStorageImage()
 	chainConfig.Spec.ControllerImage = chain.GetControllerImage()
 	chainConfig.Spec.KmsImage = chain.GetKmsImage()
-	chainConfig.Spec.PullPolicy = v1.PullAlways
 
 	err := kubeapi.K8sClient.Create(ctx, chainConfig)
 	if err != nil {

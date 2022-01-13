@@ -7,10 +7,10 @@ import (
 )
 
 const (
-	defaultDialTimeout      = 2 * time.Second
-	defaultCommandTimeOut   = 5 * time.Second
-	defaultKeepAliveTime    = 2 * time.Second
-	defaultKeepAliveTimeOut = 6 * time.Second
+	defaultDialTimeout      = 2 * time.Minute
+	defaultCommandTimeOut   = 5 * time.Minute
+	defaultKeepAliveTime    = 2 * time.Minute
+	defaultKeepAliveTimeOut = 6 * time.Minute
 )
 
 var (
@@ -38,5 +38,6 @@ func init() {
 	// add sub command here
 	RootCmd.AddCommand(
 		NewChainCommand(),
-		NewAccountCommand())
+		NewAccountCommand(),
+		NewAllInOneCommand())
 }

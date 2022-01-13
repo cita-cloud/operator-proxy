@@ -289,6 +289,6 @@ func generateAccountOrNodeName(name string) string {
 }
 
 func generateAccountPassword() (string, error) {
-	_, err := password.Generate(16, 4, 4, false, false)
-	return "123456", err
+	generate, err := password.Generate(16, 4, 4, false, false)
+	return generate, err
 }

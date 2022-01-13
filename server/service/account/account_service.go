@@ -4,11 +4,12 @@ import (
 	"context"
 
 	citacloudv1 "github.com/cita-cloud/cita-cloud-operator/api/v1"
-	pb "github.com/cita-cloud/operator-proxy/api/account"
-	"github.com/cita-cloud/operator-proxy/server/kubeapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	pb "github.com/cita-cloud/operator-proxy/api/account"
+	"github.com/cita-cloud/operator-proxy/server/kubeapi"
 )
 
 var _ pb.AccountServiceServer = &accountServer{}
@@ -43,7 +44,9 @@ func (a accountServer) ListAccount(ctx context.Context, request *pb.ListAccountR
 	accountCrList := &citacloudv1.AccountList{}
 	accountCrOpts := []client.ListOption{
 		client.InNamespace(request.GetNamespace()),
-		client.MatchingFields{"spec.chain": request.GetChain()},
+	}
+	if request.GetChain() != "" {
+		accountCrOpts = append(accountCrOpts, client.MatchingFields{"spec.chain": request.GetChain()})
 	}
 	if err := kubeapi.K8sClient.List(ctx, accountCrList, accountCrOpts...); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to list account cr", err)
@@ -60,7 +63,7 @@ func (a accountServer) ListAccount(ctx context.Context, request *pb.ListAccountR
 		}
 		accountList = append(accountList, ac)
 	}
-	return &pb.AccountList{Account: accountList}, status.New(codes.OK, "").Err()
+	return &pb.AccountList{Accounts: accountList}, status.New(codes.OK, "").Err()
 }
 
 func convertSpecToProto(role citacloudv1.Role) pb.Role {

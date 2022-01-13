@@ -3,31 +3,40 @@ package client
 import (
 	"context"
 
-	pb "github.com/cita-cloud/operator-proxy/api/citacloud"
+	pb "github.com/cita-cloud/operator-proxy/api/chain"
 	"google.golang.org/grpc"
 )
 
 type ChainInterface interface {
-	InitChain(ctx context.Context, in *pb.ChainConfig) (*pb.ChainConfigSimple, error)
+	Init(ctx context.Context, chain *pb.Chain) (*pb.ChainSimpleResponse, error)
+	List(ctx context.Context, request *pb.ListChainRequest) (*pb.ChainList, error)
 }
 
 type chain struct {
-	remote   pb.CitaCloudServiceClient
+	remote   pb.ChainServiceClient
 	callOpts []grpc.CallOption
 }
 
-func NewChain(c *Client) ChainInterface {
-	api := &chain{remote: pb.NewCitaCloudServiceClient(c.conn)}
-	if c != nil {
-		api.callOpts = c.callOpts
-	}
-	return api
-}
-
-func (c *chain) InitChain(ctx context.Context,in *pb.ChainConfig) (*pb.ChainConfigSimple, error) {
-	resp, err := c.remote.CreateChainConfig(ctx, in, c.callOpts...)
+func (c chain) Init(ctx context.Context, in *pb.Chain) (*pb.ChainSimpleResponse, error) {
+	resp, err := c.remote.Init(ctx, in, c.callOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return resp, nil
+}
+
+func (c chain) List(ctx context.Context, in *pb.ListChainRequest) (*pb.ChainList, error) {
+	resp, err := c.remote.List(ctx, in, c.callOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func NewChain(c *Client) ChainInterface {
+	api := &chain{remote: pb.NewChainServiceClient(c.conn)}
+	if c != nil {
+		api.callOpts = c.callOpts
+	}
+	return api
 }

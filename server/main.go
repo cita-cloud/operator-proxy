@@ -4,13 +4,18 @@ import (
 	"log"
 	"net"
 
-	accountpb "github.com/cita-cloud/operator-proxy/api/account"
-	citacloudpb "github.com/cita-cloud/operator-proxy/api/citacloud"
-	k8sclient "github.com/cita-cloud/operator-proxy/server/kubeapi"
-	"github.com/cita-cloud/operator-proxy/server/service"
-	accountservice "github.com/cita-cloud/operator-proxy/server/service/account"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+
+	accountpb "github.com/cita-cloud/operator-proxy/api/account"
+	allinonepb "github.com/cita-cloud/operator-proxy/api/allinone"
+	chainpb "github.com/cita-cloud/operator-proxy/api/chain"
+	nodepb "github.com/cita-cloud/operator-proxy/api/node"
+	k8sclient "github.com/cita-cloud/operator-proxy/server/kubeapi"
+	accountservice "github.com/cita-cloud/operator-proxy/server/service/account"
+	allinoneservice "github.com/cita-cloud/operator-proxy/server/service/allinone"
+	chainservice "github.com/cita-cloud/operator-proxy/server/service/chain"
+	nodeservice "github.com/cita-cloud/operator-proxy/server/service/node"
 )
 
 const (
@@ -29,11 +34,17 @@ func main() {
 	}
 	s := grpc.NewServer()
 
-	ccServer := service.NewCitaCloudServer()
-	citacloudpb.RegisterCitaCloudServiceServer(s, ccServer)
+	chainServer := chainservice.NewChainServer()
+	chainpb.RegisterChainServiceServer(s, chainServer)
 
 	accountServer := accountservice.NewAccountServer()
 	accountpb.RegisterAccountServiceServer(s, accountServer)
+
+	nodeServer := nodeservice.NewNodeServer()
+	nodepb.RegisterNodeServiceServer(s, nodeServer)
+
+	allInOneServer := allinoneservice.NewAllInOneServer()
+	allinonepb.RegisterAllInOneServiceServer(s, allInOneServer)
 
 	log.Printf("Starting gRPC listener on port " + port)
 

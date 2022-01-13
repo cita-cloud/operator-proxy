@@ -1,0 +1,37 @@
+syntax = "proto3";
+package allinone;
+option go_package = "github.com/cita-cloud/operator-proxy/api/allinone";
+
+import "api/chain/chain.proto";
+
+message AllInOneCreateRequest {
+  string name = 1;
+  string namespace = 2;
+  string id = 3;
+  int64 timestamp = 4;
+  string prevHash = 5;
+  int32 blockInterval = 6;
+  int32 blockLimit = 7;
+  bool enableTls = 8;
+  chain.ConsensusType consensusType = 9;
+  string networkImage = 10;
+  string consensusImage = 11;
+  string executorImage = 12;
+  string storageImage = 13;
+  string controllerImage = 14;
+  string kmsImage = 15;
+  int32 nodeCount = 16;
+  int64 storageSize = 17;
+  string storageClassName = 18;
+  string logLevel = 19;
+}
+
+message AllInOneCreateResponse {
+  string name = 1;
+  string namespace = 2;
+}
+
+
+service AllInOneService {
+  rpc Create(AllInOneCreateRequest) returns (AllInOneCreateResponse);
+}

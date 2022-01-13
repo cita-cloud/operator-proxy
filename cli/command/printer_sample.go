@@ -2,17 +2,37 @@ package command
 
 import (
 	"fmt"
+	"strings"
 
 	accountpb "github.com/cita-cloud/operator-proxy/api/account"
-	pb "github.com/cita-cloud/operator-proxy/api/citacloud"
+	pb "github.com/cita-cloud/operator-proxy/api/allinone"
+	chainpb "github.com/cita-cloud/operator-proxy/api/chain"
 )
 
 type simplePrinter struct{}
 
-func (s *simplePrinter) CreateAccount(account *accountpb.Account) {
-	fmt.Println("create account success")
+func (s *simplePrinter) CreateAllInOne(response *pb.AllInOneCreateResponse) {
+	fmt.Println(fmt.Sprintf("create chain [%s/%s] success by one click", response.GetNamespace(), response.GetName()))
 }
 
-func (s *simplePrinter) InitChain(chainSimple *pb.ChainConfigSimple)  {
-	fmt.Println("WORLD")
+func (s *simplePrinter) ListAccount(list *accountpb.AccountList) {
+	_, rows := makeAccountListTable(list)
+	for _, row := range rows {
+		fmt.Println(strings.Join(row, ", "))
+	}
+}
+
+func (s *simplePrinter) CreateAccount(account *accountpb.Account) {
+	fmt.Println(fmt.Sprintf("create account [%s/%s] success", account.GetNamespace(), account.GetName()))
+}
+
+func (s *simplePrinter) InitChain(response *chainpb.ChainSimpleResponse) {
+	fmt.Println(fmt.Sprintf("init chain [%s/%s] success", response.GetNamespace(), response.GetName()))
+}
+
+func (s *simplePrinter) ListChain(list *chainpb.ChainList) {
+	_, rows := makeChainListTable(list)
+	for _, row := range rows {
+		fmt.Println(strings.Join(row, ", "))
+	}
 }

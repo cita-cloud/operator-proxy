@@ -1,0 +1,58 @@
+syntax = "proto3";
+package chain;
+option go_package = "github.com/cita-cloud/operator-proxy/api/chain";
+
+
+message Chain {
+  string name = 1;
+  string namespace = 2;
+  string id = 3;
+  int64 timestamp = 4;
+  string prevHash = 5;
+  int32 blockInterval = 6;
+  int32 blockLimit = 7;
+  bool enableTls = 8;
+  ConsensusType consensusType = 9;
+  string networkImage = 10;
+  string consensusImage = 11;
+  string executorImage = 12;
+  string storageImage = 13;
+  string controllerImage = 14;
+  string kmsImage = 15;
+}
+
+enum ConsensusType {
+  BFT = 0;
+  Raft = 1;
+}
+
+enum Status {
+  Online = 0;
+  Publicizing = 1;
+}
+
+
+message ChainSimpleResponse {
+  string name = 1;
+  string namespace = 2;
+  Status status = 3;
+}
+
+message ListChainRequest {
+  string namespace = 1;
+}
+
+message ChainList {
+  repeated ChainSimpleResponse chains = 1;
+}
+
+message ChainOnlineRequest {
+  string name = 1;
+  string namespace = 2;
+}
+
+service ChainService {
+  rpc Init(Chain) returns (ChainSimpleResponse);
+  rpc List(ListChainRequest) returns (ChainList);
+  rpc Online(ChainOnlineRequest) returns (ChainSimpleResponse);
+}

@@ -7,9 +7,25 @@ import (
 	accountpb "github.com/cita-cloud/operator-proxy/api/account"
 	pb "github.com/cita-cloud/operator-proxy/api/allinone"
 	chainpb "github.com/cita-cloud/operator-proxy/api/chain"
+	"github.com/cita-cloud/operator-proxy/api/node"
 )
 
 type simplePrinter struct{}
+
+func (s *simplePrinter) ListNode(list *node.NodeList) {
+	_, rows := makeNodeListTable(list)
+	for _, row := range rows {
+		fmt.Println(strings.Join(row, ", "))
+	}
+}
+
+func (s *simplePrinter) StartNode(response *node.NodeSimpleResponse) {
+	fmt.Println(fmt.Sprintf("start node [%s/%s] success", response.GetNamespace(), response.GetName()))
+}
+
+func (s *simplePrinter) InitNode(response *node.NodeSimpleResponse) {
+	fmt.Println(fmt.Sprintf("init node [%s/%s] success", response.GetNamespace(), response.GetName()))
+}
 
 func (s *simplePrinter) CreateAllInOne(response *pb.AllInOneCreateResponse) {
 	fmt.Println(fmt.Sprintf("create chain [%s/%s] success by one click", response.GetNamespace(), response.GetName()))

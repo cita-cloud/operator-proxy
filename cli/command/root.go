@@ -38,6 +38,7 @@ func init() {
 	// add sub command here
 	RootCmd.AddCommand(
 		NewChainCommand(),
+		NewNodeCommand(),
 		NewAccountCommand(),
 		NewAllInOneCommand())
 }

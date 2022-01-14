@@ -1,6 +1,9 @@
 GO_BUILD = $(GO_CMD) build
 GO_CMD = $(GO_ENV) go
 
+#IMG ?= citacloud/operator-proxy:v0.0.1
+IMG ?= registry.devops.rivtower.com/cita-cloud/operator/operator-proxy:v0.0.1
+
 PROTOC_IMAGE_NAME=registry.devops.rivtower.com/cita-cloud/operator/protoc
 PROTOC_IMAGE_VERSION=3.19.1
 
@@ -24,3 +27,9 @@ build: fmt mac-cli
 mac-cli: GO_ENV += GOOS=darwin GOARCH=amd64
 mac-cli:
 	$(GO_BUILD) -o bin/cco-cli-mac ./cli
+
+docker-build: ## Build docker image with the manager.
+	docker build -t ${IMG} .
+
+docker-push: ## Push docker image with the manager.
+	docker push ${IMG}

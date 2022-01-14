@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cita-cloud-operator-proxy
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    app.kubernetes.io/component: controller
+    {{- include "cita-cloud-operator-proxy.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: cita-cloud-operator-proxy
+      {{- include "cita-cloud-operator-proxy.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: cita-cloud-operator-proxy
+        {{- include "cita-cloud-operator-proxy.selectorLabels" . | nindent 8 }}
+    spec:
+      terminationGracePeriodSeconds: 5
+      serviceAccountName: {{ .Values.serviceAccountName }}
+      containers:
+        - name: proxy-server
+          image: {{ .Values.global.registry }}/{{.Values.global.repository}}/operator-proxy:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /operator-proxy
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}

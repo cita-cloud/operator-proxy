@@ -3,13 +3,18 @@ module github.com/cita-cloud/operator-proxy
 go 1.17
 
 require (
-	github.com/cita-cloud/cita-cloud-operator v0.0.0-20211209075225-689de79199e4
+	github.com/cita-cloud/cita-cloud-operator v0.0.0-20220114072702-07debfef53ff
+	github.com/google/uuid v1.1.2
 	github.com/olekukonko/tablewriter v0.0.5
+	github.com/pkg/errors v0.9.1
+	github.com/sethvargo/go-password v0.2.0
 	github.com/spf13/cobra v1.3.0
+	github.com/tjfoc/gmsm v1.4.1
 	google.golang.org/grpc v1.43.0
 	google.golang.org/protobuf v1.27.1
 	k8s.io/apimachinery v0.22.1
 	k8s.io/client-go v0.22.1
+	k8s.io/utils v0.0.0-20211116205334-6203023598ed
 	sigs.k8s.io/controller-runtime v0.10.0
 )
 
@@ -25,7 +30,6 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/gofuzz v1.1.0 // indirect
-	github.com/google/uuid v1.1.2 // indirect
 	github.com/googleapis/gnostic v0.5.5 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
@@ -34,14 +38,11 @@ require (
 	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.11.0 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.26.0 // indirect
 	github.com/prometheus/procfs v0.6.0 // indirect
-	github.com/sethvargo/go-password v0.2.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/tjfoc/gmsm v1.4.1 // indirect
 	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
 	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
@@ -59,9 +60,6 @@ require (
 	k8s.io/component-base v0.22.1 // indirect
 	k8s.io/klog/v2 v2.9.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20210421082810-95288971da7e // indirect
-	k8s.io/utils v0.0.0-20211116205334-6203023598ed // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
-
-replace github.com/cita-cloud/cita-cloud-operator v0.0.0-20211209075225-689de79199e4 => ../cita-cloud-operator

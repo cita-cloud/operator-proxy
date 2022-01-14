@@ -1,0 +1,14 @@
+global:
+  # global.registry -- You can specify the image registry.
+  #  registry: docker.io
+  registry: registry.devops.rivtower.com
+  # global.repository -- You can specify the image repository.
+  repository: cita-cloud/operator
+
+image:
+  pullPolicy: Always
+  tag: v0.0.1
+
+replicas: 1
+
+serviceAccountName: cita-cloud-operator-proxy-sa

@@ -34,7 +34,7 @@ mac-cli:
 
 win-cli: GO_ENV += GOOS=windows GOARCH=386
 win-cli:
-	$(GO_BUILD) -o bin/squidsctl.exe ./cli
+	$(GO_BUILD) -o bin/cco-cli.exe ./cli
 
 docker-build: ## Build docker image with the manager.
 	docker build -t ${IMG} .

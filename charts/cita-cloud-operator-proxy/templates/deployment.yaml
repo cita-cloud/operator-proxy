@@ -4,7 +4,7 @@ metadata:
   name: cita-cloud-operator-proxy
   namespace: {{ .Release.Namespace | quote }}
   labels:
-    app.kubernetes.io/component: controller
+    app.kubernetes.io/component: proxy-server
     {{- include "cita-cloud-operator-proxy.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicas }}

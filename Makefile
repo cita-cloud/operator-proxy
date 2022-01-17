@@ -22,11 +22,19 @@ grpc-code-generate:
 	docker run -v $(PWD):/src -e GO111MODULE=on $(PROTOC_IMAGE_NAME):$(PROTOC_IMAGE_VERSION) /bin/bash ./grpc-code-generate.sh
 
 
-build: fmt mac-cli
+build: fmt linux-cli mac-cli win-cli
+
+linux-cli: GO_ENV += GOOS=linux GOARCH=amd64
+linux-cli:
+	$(GO_BUILD) -o bin/cco-cli ./cli
 
 mac-cli: GO_ENV += GOOS=darwin GOARCH=amd64
 mac-cli:
 	$(GO_BUILD) -o bin/cco-cli-mac ./cli
+
+win-cli: GO_ENV += GOOS=windows GOARCH=386
+win-cli:
+	$(GO_BUILD) -o bin/squidsctl.exe ./cli
 
 docker-build: ## Build docker image with the manager.
 	docker build -t ${IMG} .

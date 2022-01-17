@@ -1,11 +1,12 @@
 name: Release Helm Charts
 
+# Controls when the action will run.
 on:
   push:
-    branches:
-      - develop
-    paths:
-      - "charts/**"
+    branches: [ develop ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 jobs:
   release:

@@ -1,1 +1,126 @@
 package command
+
+import (
+	pb "github.com/cita-cloud/operator-proxy/api/node"
+	"github.com/spf13/cobra"
+)
+
+var (
+	initNodeRequest = pb.Node{}
+
+	listNodeRequest  = pb.ListNodeRequest{}
+	startNodeRequest = pb.NodeStartRequest{}
+)
+
+func NewNodeCommand() *cobra.Command {
+	cc := &cobra.Command{
+		Use:   "node <subcommand>",
+		Short: "Node related commands",
+	}
+
+	cc.AddCommand(NewNodeInitCommand())
+	cc.AddCommand(NewNodeListCommand())
+	cc.AddCommand(NewNodeStartCommand())
+
+	return cc
+}
+
+func NewNodeInitCommand() *cobra.Command {
+	cc := &cobra.Command{
+		Use:   "init <node name>",
+		Short: "Init a node for chain",
+
+		Run: nodeInitCommandFunc,
+	}
+
+	cc.Flags().StringVarP(&initNodeRequest.Namespace, "namespace", "n", "cita", "The namespace that your node create in k8s.")
+	cc.Flags().StringVarP(&initNodeRequest.Cluster, "cluster", "", "", "The name of the k8s cluster where the node is located.")
+	cc.Flags().StringVarP(&initNodeRequest.Chain, "chain", "", "", "The chain name corresponding to the node.")
+	cc.Flags().StringVarP(&initNodeRequest.Account, "account", "a", "", "The account name corresponding to the node.")
+	cc.Flags().StringVarP(&initNodeRequest.ExternalIp, "externalIp", "", "", "The external ip exposed by node.")
+	cc.Flags().Int32VarP(&initNodeRequest.Port, "port", "", 9999, "The external ip exposed by node.")
+	cc.Flags().StringVarP(&initNodeRequest.StorageClassName, "storageClassName", "", "", "The node's storage class.")
+	cc.Flags().Int64VarP(&initNodeRequest.StorageSize, "storageSize", "", 10737418240, "The chain's storage size.")
+	cc.Flags().StringVarP(&initNodeRequest.LogLevel, "logLevel", "", "info", "The node's log level.")
+
+	return cc
+}
+
+func nodeInitCommandFunc(cmd *cobra.Command, args []string) {
+	// create grpc client
+	ctx, cancel := commandCtx(cmd)
+	defer func() {
+		cancel()
+	}()
+	cli := newClientFromCmd(cmd)
+
+	initNodeRequest.Name = args[0]
+
+	resp, err := cli.NodeInterface.Init(ctx, &initNodeRequest)
+	if err != nil {
+		ExitWithError(ExitError, err)
+	}
+
+	display.InitNode(resp)
+}
+
+func NewNodeListCommand() *cobra.Command {
+	cc := &cobra.Command{
+		Use:   "list [options]",
+		Short: "List node in the k8s cluster",
+
+		Run: nodeListCommandFunc,
+	}
+
+	cc.Flags().StringVarP(&listNodeRequest.Namespace, "namespace", "n", "cita", "The namespace that your node in k8s.")
+	cc.Flags().StringVarP(&listNodeRequest.Chain, "chain", "c", "", "The chain name corresponding to the node.")
+
+	return cc
+}
+
+func nodeListCommandFunc(cmd *cobra.Command, args []string) {
+	// create grpc client
+	ctx, cancel := commandCtx(cmd)
+	defer func() {
+		cancel()
+	}()
+	cli := newClientFromCmd(cmd)
+
+	resp, err := cli.NodeInterface.List(ctx, &listNodeRequest)
+	if err != nil {
+		ExitWithError(ExitError, err)
+	}
+
+	display.ListNode(resp)
+}
+
+func NewNodeStartCommand() *cobra.Command {
+	cc := &cobra.Command{
+		Use:   "start <node name>",
+		Short: "Start a node",
+
+		Run: nodeStartCommandFunc,
+	}
+
+	cc.Flags().StringVarP(&startNodeRequest.Namespace, "namespace", "n", "cita", "The namespace that your node in k8s.")
+
+	return cc
+}
+
+func nodeStartCommandFunc(cmd *cobra.Command, args []string) {
+	// create grpc client
+	ctx, cancel := commandCtx(cmd)
+	defer func() {
+		cancel()
+	}()
+	cli := newClientFromCmd(cmd)
+
+	startNodeRequest.Name = args[0]
+
+	resp, err := cli.NodeInterface.Start(ctx, &startNodeRequest)
+	if err != nil {
+		ExitWithError(ExitError, err)
+	}
+
+	display.StartNode(resp)
+}

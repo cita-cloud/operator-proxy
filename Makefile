@@ -1,6 +1,9 @@
 GO_BUILD = $(GO_CMD) build
 GO_CMD = $(GO_ENV) go
 
+#IMG ?= citacloud/operator-proxy:v0.0.1
+IMG ?= registry.devops.rivtower.com/cita-cloud/operator/operator-proxy:v0.0.1
+
 PROTOC_IMAGE_NAME=registry.devops.rivtower.com/cita-cloud/operator/protoc
 PROTOC_IMAGE_VERSION=3.19.1
 
@@ -19,8 +22,22 @@ grpc-code-generate:
 	docker run -v $(PWD):/src -e GO111MODULE=on $(PROTOC_IMAGE_NAME):$(PROTOC_IMAGE_VERSION) /bin/bash ./grpc-code-generate.sh
 
 
-build: fmt mac-cli
+build: fmt linux-cli mac-cli win-cli
+
+linux-cli: GO_ENV += GOOS=linux GOARCH=amd64
+linux-cli:
+	$(GO_BUILD) -o bin/cco-cli ./cli
 
 mac-cli: GO_ENV += GOOS=darwin GOARCH=amd64
 mac-cli:
 	$(GO_BUILD) -o bin/cco-cli-mac ./cli
+
+win-cli: GO_ENV += GOOS=windows GOARCH=386
+win-cli:
+	$(GO_BUILD) -o bin/cco-cli.exe ./cli
+
+docker-build: ## Build docker image with the manager.
+	docker build -t ${IMG} .
+
+docker-push: ## Push docker image with the manager.
+	docker push ${IMG}

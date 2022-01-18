@@ -1,6 +1,7 @@
 package command
 
 import (
+	"os"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -26,7 +27,7 @@ var RootCmd = &cobra.Command{
 func init() {
 	//cobra.OnInitialize(initConfig)
 
-	RootCmd.PersistentFlags().StringVar(&globalFlags.Endpoint, "endpoint", "127.0.0.1:8090", "gRPC server endpoints")
+	RootCmd.PersistentFlags().StringVar(&globalFlags.Endpoint, "endpoint", getEndPoint(), "gRPC server endpoints")
 
 	RootCmd.PersistentFlags().StringVarP(&globalFlags.OutputFormat, "write-out", "w", "table", "set the output format (simple, table)")
 
@@ -38,6 +39,16 @@ func init() {
 	// add sub command here
 	RootCmd.AddCommand(
 		NewChainCommand(),
+		NewNodeCommand(),
 		NewAccountCommand(),
 		NewAllInOneCommand())
+}
+
+func getEndPoint() string {
+	endpoint := os.Getenv("OPERATOR_PROXY_ENDPOINT")
+	if endpoint != "" {
+		return endpoint
+	} else {
+		return "127.0.0.1:8090"
+	}
 }

@@ -28,7 +28,7 @@ func (c chainServer) Init(ctx context.Context, chain *pb.Chain) (*pb.ChainSimple
 	chainConfig.Spec.BlockInterval = chain.GetBlockInterval()
 	chainConfig.Spec.BlockLimit = chain.GetBlockLimit()
 	chainConfig.Spec.EnableTLS = chain.GetEnableTls()
-	chainConfig.Spec.ConsensusType = citacloudv1.ConsensusType(chain.GetConsensusType())
+	chainConfig.Spec.ConsensusType = convertProtoToSpec(chain.GetConsensusType())
 	// default status is Publicizing
 	chainConfig.Spec.Action = citacloudv1.Publicizing
 	chainConfig.Spec.NetworkImage = chain.GetNetworkImage()
@@ -90,4 +90,14 @@ func (c chainServer) Online(ctx context.Context, request *pb.ChainOnlineRequest)
 
 func NewChainServer() pb.ChainServiceServer {
 	return &chainServer{}
+}
+
+// todo: modify
+func convertProtoToSpec(consensusType pb.ConsensusType) citacloudv1.ConsensusType {
+	if consensusType == pb.ConsensusType_Raft {
+		return citacloudv1.Raft
+	} else if consensusType == pb.ConsensusType_BFT {
+		return citacloudv1.BFT
+	}
+	return ""
 }

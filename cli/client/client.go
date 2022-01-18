@@ -71,6 +71,7 @@ type Config struct {
 type Client struct {
 	ChainInterface
 	AccountInterface
+	NodeInterface
 	AllInOneInterface
 
 	conn *grpc.ClientConn
@@ -147,6 +148,7 @@ func newClient(cfg *Config) (*Client, error) {
 
 	// New grpc service client
 	client.ChainInterface = NewChain(client)
+	client.NodeInterface = NewNode(client)
 	client.AccountInterface = NewAccount(client)
 	client.AllInOneInterface = NewAllInOne(client)
 

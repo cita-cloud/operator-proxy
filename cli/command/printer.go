@@ -5,12 +5,15 @@ import (
 	allinonepb "github.com/cita-cloud/operator-proxy/api/allinone"
 	chainpb "github.com/cita-cloud/operator-proxy/api/chain"
 	nodepb "github.com/cita-cloud/operator-proxy/api/node"
+	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 type printer interface {
 	// chain
 	InitChain(response *chainpb.ChainSimpleResponse)
+	OnlineChain(response *chainpb.ChainSimpleResponse)
 	ListChain(list *chainpb.ChainList)
+	DescribeChain(response *chainpb.ChainDescribeResponse)
 
 	// node
 	InitNode(response *nodepb.NodeSimpleResponse)
@@ -61,13 +64,16 @@ func makeChainListTable(list *chainpb.ChainList) (header []string, rows [][]stri
 	return header, rows
 }
 
-func makeNodeListTable(list *nodepb.NodeList) (header []string, rows [][]string) {
-	header = []string{"Name", "Namespace", "Status"}
-	for _, node := range list.Nodes {
+func makeNodeListTable(list []*nodepb.Node) (header []string, rows [][]string) {
+	header = []string{"Name", "Namespace", "Chain", "Account", "Size", "Status"}
+	for _, node := range list {
 		rows = append(rows, []string{
 			node.Name,
 			node.Namespace,
-			"",
+			node.GetChain(),
+			node.GetAccount(),
+			resource.NewQuantity(node.GetStorageSize(), resource.BinarySI).String(),
+			node.GetStatus().String(),
 		})
 	}
 	return header, rows

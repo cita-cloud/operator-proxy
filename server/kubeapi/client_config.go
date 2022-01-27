@@ -3,7 +3,6 @@ package kubeapi
 import (
 	"context"
 
-	citacloudv1 "github.com/cita-cloud/cita-cloud-operator/api/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -11,6 +10,8 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	citacloudv1 "github.com/cita-cloud/cita-cloud-operator/api/v1"
 )
 
 var scheme = runtime.NewScheme()
@@ -49,8 +50,8 @@ func InitK8sClient() error {
 	}
 
 	k8sManager, err := ctrl.NewManager(config, ctrl.Options{
-		Scheme:         scheme,
-		LeaderElection: false,
+		Scheme:             scheme,
+		LeaderElection:     false,
 		MetricsBindAddress: "0",
 	})
 	if err != nil {
@@ -60,6 +61,15 @@ func InitK8sClient() error {
 	err = k8sManager.GetCache().IndexField(context.Background(), &citacloudv1.Account{}, "spec.chain", func(o client.Object) []string {
 		var res []string
 		res = append(res, o.(*citacloudv1.Account).Spec.Chain)
+		return res
+	})
+	if err != nil {
+		return err
+	}
+
+	err = k8sManager.GetCache().IndexField(context.Background(), &citacloudv1.ChainNode{}, "spec.chainName", func(o client.Object) []string {
+		var res []string
+		res = append(res, o.(*citacloudv1.ChainNode).Spec.ChainName)
 		return res
 	})
 	if err != nil {

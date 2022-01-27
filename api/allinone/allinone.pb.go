@@ -143,7 +143,7 @@ func (x *AllInOneCreateRequest) GetConsensusType() chain.ConsensusType {
 	if x != nil {
 		return x.ConsensusType
 	}
-	return chain.ConsensusType_BFT
+	return chain.ConsensusType_UnknownConsensusType
 }
 
 func (x *AllInOneCreateRequest) GetNetworkImage() string {

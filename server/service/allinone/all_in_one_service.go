@@ -140,7 +140,7 @@ func (a allInOneServer) Create(ctx context.Context, request *pb.AllInOneCreateRe
 			Chain:       request.GetName(),
 			KmsPassword: accountPwd,
 			Role:        accountpb.Role_Consensus,
-			Domain:      "",
+			Domain:      fmt.Sprintf("%s.citacloud.com", nodeAccountName),
 		}
 		_, err = accountsvc.NewAccountServer().CreateAccount(ctx, nodeAccountReq)
 		if err != nil {
@@ -183,7 +183,7 @@ func (a allInOneServer) Create(ctx context.Context, request *pb.AllInOneCreateRe
 			Name:      nodeName,
 			Namespace: request.GetNamespace(),
 			// todo modify this field
-			Cluster:          "k8s-1",
+			Cluster:          "all-in-one-k8s-cluster",
 			Account:          nodeAccountName,
 			Chain:            request.GetName(),
 			StorageSize:      request.GetStorageSize(),

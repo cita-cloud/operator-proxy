@@ -13,7 +13,7 @@ import (
 type simplePrinter struct{}
 
 func (s *simplePrinter) ListNode(list *node.NodeList) {
-	_, rows := makeNodeListTable(list)
+	_, rows := makeNodeListTable(list.Nodes)
 	for _, row := range rows {
 		fmt.Println(strings.Join(row, ", "))
 	}
@@ -46,9 +46,17 @@ func (s *simplePrinter) InitChain(response *chainpb.ChainSimpleResponse) {
 	fmt.Println(fmt.Sprintf("init chain [%s/%s] success", response.GetNamespace(), response.GetName()))
 }
 
+func (s *simplePrinter) OnlineChain(response *chainpb.ChainSimpleResponse) {
+	fmt.Println(fmt.Sprintf("online chain [%s/%s] success", response.GetNamespace(), response.GetName()))
+}
+
 func (s *simplePrinter) ListChain(list *chainpb.ChainList) {
 	_, rows := makeChainListTable(list)
 	for _, row := range rows {
 		fmt.Println(strings.Join(row, ", "))
 	}
+}
+
+func (s *simplePrinter) DescribeChain(response *chainpb.ChainDescribeResponse) {
+	panic("implement me")
 }

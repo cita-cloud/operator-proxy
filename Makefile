@@ -28,9 +28,9 @@ linux-cli: GO_ENV += GOOS=linux GOARCH=amd64
 linux-cli:
 	$(GO_BUILD) -o bin/cco-cli ./cli
 
-mac-cli: GO_ENV += GOOS=darwin GOARCH=amd64
+mac-cli: GO_ENV += GOOS=darwin GOARCH=arm64
 mac-cli:
-	$(GO_BUILD) -o bin/cco-cli-mac ./cli
+	$(GO_BUILD) -o bin/cco-cli ./cli
 
 win-cli: GO_ENV += GOOS=windows GOARCH=386
 win-cli:

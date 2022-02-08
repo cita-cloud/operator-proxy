@@ -70,8 +70,15 @@ func (t *tablePrinter) DescribeChain(response *chainpb.ChainDescribeResponse) {
 	table.AppendBulk(data)
 	table.Render()
 
+	fmt.Println("Admin Account:")
+	al := make([]*accountpb.Account, 0)
+	al = append(al, response.AdminAccount)
+	accountList := &accountpb.AccountList{Accounts: al}
+	header, rows := makeAccountListTable(accountList)
+	t.printTable(header, rows)
+
 	fmt.Println("Node Info:")
-	header, rows := makeNodeListTable(response.Nodes)
+	header, rows = makeNodeListTable(response.Nodes)
 	t.printTable(header, rows)
 }
 

@@ -28,6 +28,7 @@ import (
 
 	pb "github.com/cita-cloud/operator-proxy/api/chain"
 	"github.com/cita-cloud/operator-proxy/server/kubeapi"
+	"github.com/cita-cloud/operator-proxy/server/service/account"
 	"github.com/cita-cloud/operator-proxy/server/service/resource"
 )
 
@@ -112,6 +113,11 @@ func (c chainServer) Describe(ctx context.Context, request *pb.ChainDescribeRequ
 		return nil, status.Errorf(codes.Internal, "failed to get chain cr", err)
 	}
 
+	adminAccount, err := account.GetAdminAccountByChain(ctx, request.GetNamespace(), request.GetName())
+	if err != nil {
+		return nil, err
+	}
+
 	nodeList, err := resource.GetNodeList(ctx, request.GetNamespace(), request.GetName())
 	if err != nil {
 		return nil, err
@@ -134,6 +140,7 @@ func (c chainServer) Describe(ctx context.Context, request *pb.ChainDescribeRequ
 		ControllerImage: chain.Spec.ControllerImage,
 		KmsImage:        chain.Spec.KmsImage,
 		Nodes:           nodeList,
+		AdminAccount:    adminAccount,
 	}, status.New(codes.OK, "").Err()
 }
 

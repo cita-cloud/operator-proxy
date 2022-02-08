@@ -101,3 +101,31 @@ func convertProtoToSpec(role pb.Role) citacloudv1.Role {
 		return citacloudv1.Ordinary
 	}
 }
+
+func GetAdminAccountByChain(ctx context.Context, namespace, chainName string) (*pb.Account, error) {
+	accountCrList := &citacloudv1.AccountList{}
+	accountCrOpts := []client.ListOption{
+		client.InNamespace(namespace),
+	}
+	accountCrOpts = append(accountCrOpts, client.MatchingFields{"spec.chain": chainName})
+	if err := kubeapi.K8sClient.List(ctx, accountCrList, accountCrOpts...); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to list account cr", err)
+	}
+	if len(accountCrList.Items) == 0 {
+		return nil, nil
+	}
+	for _, account := range accountCrList.Items {
+		if account.Spec.Role == citacloudv1.Admin {
+			res := &pb.Account{
+				Name:        account.Name,
+				Namespace:   account.Namespace,
+				Chain:       chainName,
+				KmsPassword: account.Spec.KmsPassword,
+				Role:        pb.Role_Admin,
+				Domain:      account.Spec.Domain,
+			}
+			return res, nil
+		}
+	}
+	return nil, nil
+}

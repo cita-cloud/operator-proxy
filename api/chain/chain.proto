@@ -3,6 +3,7 @@ package chain;
 option go_package = "github.com/cita-cloud/operator-proxy/api/chain";
 
 import "api/node/node.proto";
+import "api/account/account.proto";
 
 message Chain {
   string name = 1;
@@ -76,6 +77,7 @@ message ChainDescribeResponse {
   string controllerImage = 14;
   string kmsImage = 15;
   repeated node.Node nodes = 16;
+  account.Account adminAccount = 17;
 }
 
 service ChainService {

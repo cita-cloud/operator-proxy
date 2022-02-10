@@ -18,6 +18,8 @@ package chain
 
 import (
 	"context"
+	"github.com/cita-cloud/operator-proxy/pkg/utils"
+	"time"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -37,7 +39,52 @@ var _ pb.ChainServiceServer = &chainServer{}
 type chainServer struct {
 }
 
+func setDefault(request *pb.Chain) {
+	if request.GetId() == "" {
+		request.Id = utils.GenerateChainId(request.GetName())
+	}
+	if request.GetTimestamp() == 0 {
+		request.Timestamp = time.Now().UnixMicro()
+	}
+	if request.GetPrevHash() == "" {
+		request.PrevHash = "0x0000000000000000000000000000000000000000000000000000000000000000"
+	}
+	if request.GetBlockInterval() == 0 {
+		request.BlockInterval = 3
+	}
+	if request.GetBlockLimit() == 0 {
+		request.BlockLimit = 100
+	}
+	if request.GetNetworkImage() == "" {
+		if request.GetEnableTls() {
+			request.NetworkImage = "citacloud/network_tls:v6.3.0"
+		} else {
+			request.NetworkImage = "citacloud/network_p2p:v6.3.0"
+		}
+	}
+	if request.GetConsensusImage() == "" {
+		if request.ConsensusType == pb.ConsensusType_Raft {
+			request.ConsensusImage = "citacloud/consensus_raft:v6.3.0"
+		} else if request.ConsensusType == pb.ConsensusType_BFT {
+			request.ConsensusImage = "citacloud/consensus_bft:v6.3.0"
+		}
+	}
+	if request.GetExecutorImage() == "" {
+		request.ExecutorImage = "citacloud/executor_evm:v6.3.0"
+	}
+	if request.GetStorageImage() == "" {
+		request.StorageImage = "citacloud/storage_rocksdb:v6.3.0"
+	}
+	if request.GetControllerImage() == "" {
+		request.ControllerImage = "citacloud/controller:v6.3.0"
+	}
+	if request.GetKmsImage() == "" {
+		request.KmsImage = "citacloud/kms_sm:v6.3.0"
+	}
+}
+
 func (c chainServer) Init(ctx context.Context, chain *pb.Chain) (*pb.ChainSimpleResponse, error) {
+	setDefault(chain)
 	chainConfig := &citacloudv1.ChainConfig{}
 	chainConfig.Name = chain.GetName()
 	chainConfig.Namespace = chain.GetNamespace()
@@ -81,7 +128,7 @@ func (c chainServer) List(ctx context.Context, request *pb.ListChainRequest) (*p
 		c := &pb.ChainSimpleResponse{
 			Name:      chainCr.Name,
 			Namespace: chainCr.Namespace,
-			//Status:    chainCr.Status,
+			Status:    convertStatusFromSpecToProto(chainCr.Status.Status),
 		}
 		chainList = append(chainList, c)
 	}
@@ -139,6 +186,7 @@ func (c chainServer) Describe(ctx context.Context, request *pb.ChainDescribeRequ
 		StorageImage:    chain.Spec.StorageImage,
 		ControllerImage: chain.Spec.ControllerImage,
 		KmsImage:        chain.Spec.KmsImage,
+		Status:          convertStatusFromSpecToProto(chain.Status.Status),
 		Nodes:           nodeList,
 		AdminAccount:    adminAccount,
 	}, status.New(codes.OK, "").Err()
@@ -166,5 +214,16 @@ func convertSpecToProto(consensusType citacloudv1.ConsensusType) pb.ConsensusTyp
 		return pb.ConsensusType_Raft
 	default:
 		return pb.ConsensusType_UnknownConsensusType
+	}
+}
+
+func convertStatusFromSpecToProto(chainStatus citacloudv1.ChainStatus) pb.Status {
+	switch chainStatus {
+	case citacloudv1.Publicizing:
+		return pb.Status_Publicizing
+	case citacloudv1.Online:
+		return pb.Status_Online
+	default:
+		return pb.Status_UnknownStatus
 	}
 }

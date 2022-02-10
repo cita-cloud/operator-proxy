@@ -63,6 +63,7 @@ func (t *tablePrinter) DescribeChain(response *chainpb.ChainDescribeResponse) {
 		{"StorageImage", response.GetStorageImage()},
 		{"ControllerImage", response.GetControllerImage()},
 		{"KmsImage", response.GetKmsImage()},
+		{"Status", response.GetStatus().String()},
 	}
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Field", "Value"})
@@ -72,7 +73,10 @@ func (t *tablePrinter) DescribeChain(response *chainpb.ChainDescribeResponse) {
 
 	fmt.Println("Admin Account:")
 	al := make([]*accountpb.Account, 0)
-	al = append(al, response.AdminAccount)
+	if response.AdminAccount != nil {
+		al = append(al, response.AdminAccount)
+	}
+
 	accountList := &accountpb.AccountList{Accounts: al}
 	header, rows := makeAccountListTable(accountList)
 	t.printTable(header, rows)

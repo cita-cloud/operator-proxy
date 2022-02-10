@@ -78,6 +78,7 @@ message ChainDescribeResponse {
   string kmsImage = 15;
   repeated node.Node nodes = 16;
   account.Account adminAccount = 17;
+  Status status = 18;
 }
 
 service ChainService {

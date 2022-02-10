@@ -26,13 +26,11 @@ import (
 	pb "github.com/cita-cloud/operator-proxy/api/allinone"
 	chainpb "github.com/cita-cloud/operator-proxy/api/chain"
 	nodepb "github.com/cita-cloud/operator-proxy/api/node"
+	"github.com/cita-cloud/operator-proxy/pkg/utils"
 	"github.com/cita-cloud/operator-proxy/server/kubeapi"
 	accountsvc "github.com/cita-cloud/operator-proxy/server/service/account"
 	chainsvc "github.com/cita-cloud/operator-proxy/server/service/chain"
 	nodesvc "github.com/cita-cloud/operator-proxy/server/service/node"
-	"github.com/google/uuid"
-	"github.com/sethvargo/go-password/password"
-	"github.com/tjfoc/gmsm/sm3"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"k8s.io/apimachinery/pkg/types"
@@ -46,7 +44,7 @@ type allInOneServer struct {
 
 func setDefault(request *pb.AllInOneCreateRequest) {
 	if request.GetId() == "" {
-		request.Id = generateChainId(request.GetName())
+		request.Id = utils.GenerateChainId(request.GetName())
 	}
 	if request.GetTimestamp() == 0 {
 		request.Timestamp = time.Now().UnixMicro()
@@ -125,12 +123,12 @@ func (a allInOneServer) Create(ctx context.Context, request *pb.AllInOneCreateRe
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to init chain: %v", err)
 	}
-	adminPwd, err := generateAccountPassword()
+	adminPwd, err := utils.GenerateAccountPassword()
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to generate admin password: %v", err)
 	}
 	adminAccountReq := &accountpb.Account{
-		Name:        generateAccountOrNodeName(request.GetName()),
+		Name:        utils.GenerateAccountOrNodeName(request.GetName()),
 		Namespace:   request.GetNamespace(),
 		Chain:       request.GetName(),
 		KmsPassword: adminPwd,
@@ -145,11 +143,11 @@ func (a allInOneServer) Create(ctx context.Context, request *pb.AllInOneCreateRe
 
 	index := int32(1)
 	for index <= request.GetNodeCount() {
-		accountPwd, err := generateAccountPassword()
+		accountPwd, err := utils.GenerateAccountPassword()
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "failed to generate node account password: %v", err)
 		}
-		nodeAccountName := generateAccountOrNodeName(request.GetName())
+		nodeAccountName := utils.GenerateAccountOrNodeName(request.GetName())
 		nodeAccountReq := &accountpb.Account{
 			Name:        nodeAccountName,
 			Namespace:   request.GetNamespace(),
@@ -193,7 +191,7 @@ func (a allInOneServer) Create(ctx context.Context, request *pb.AllInOneCreateRe
 
 	nodeNameList := make([]string, 0)
 	for _, nodeAccountName := range nodeAccountNameList {
-		nodeName := generateAccountOrNodeName(request.GetName())
+		nodeName := utils.GenerateAccountOrNodeName(request.GetName())
 		// create node
 		nodeReq := &nodepb.Node{
 			Name:      nodeName,
@@ -290,21 +288,4 @@ func (a allInOneServer) checkNodeInitialized(ctx context.Context, namespace, nam
 
 func NewAllInOneServer() pb.AllInOneServiceServer {
 	return &allInOneServer{}
-}
-
-func generateChainId(name string) string {
-	h := sm3.New()
-	h.Write([]byte(name))
-	sum := h.Sum(nil)
-	return fmt.Sprintf("%x", sum)
-}
-
-func generateAccountOrNodeName(name string) string {
-	s := uuid.New().String()
-	return name + "-" + s[len(s)-12:]
-}
-
-func generateAccountPassword() (string, error) {
-	generate, err := password.Generate(16, 4, 4, false, false)
-	return generate, err
 }

@@ -52,8 +52,7 @@ func NewAccountCreateCommand() *cobra.Command {
 	cc.Flags().StringVarP(&createAccountRequest.Namespace, "namespace", "n", "cita", "The namespace that your node account create in k8s.")
 	cc.Flags().StringVarP(&createAccountRequest.Chain, "chain", "c", "", "The chain name corresponding to the node account.")
 	cc.Flags().StringVarP(&createAccountRequest.KmsPassword, "kmsPassword", "k", "", "The account kms password.")
-	cc.Flags().StringVarP(&role, "role", "r", "", "The node account kms password.")
-	convertRole(role)
+	cc.Flags().StringVarP(&role, "role", "r", "", "The role of node account.")
 	cc.Flags().StringVarP(&createAccountRequest.Domain, "domain", "d", "", "The domain of node account.")
 
 	return cc
@@ -78,7 +77,7 @@ func accountCreateCommandFunc(cmd *cobra.Command, args []string) {
 	cli := newClientFromCmd(cmd)
 
 	createAccountRequest.Name = args[0]
-
+	convertRole(role)
 	resp, err := cli.AccountInterface.CreateAccount(ctx, &createAccountRequest)
 	if err != nil {
 		ExitWithError(ExitError, err)

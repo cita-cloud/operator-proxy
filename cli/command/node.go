@@ -54,9 +54,9 @@ func NewNodeInitCommand() *cobra.Command {
 	cc.Flags().StringVarP(&initNodeRequest.Chain, "chain", "", "", "The chain name corresponding to the node.")
 	cc.Flags().StringVarP(&initNodeRequest.Account, "account", "a", "", "The account name corresponding to the node.")
 	cc.Flags().StringVarP(&initNodeRequest.ExternalIp, "externalIp", "", "", "The external ip exposed by node.")
-	cc.Flags().Int32VarP(&initNodeRequest.Port, "port", "", 9999, "The external ip exposed by node.")
-	cc.Flags().StringVarP(&initNodeRequest.StorageClassName, "storageClassName", "", "", "The node's storage class.")
-	cc.Flags().Int64VarP(&initNodeRequest.StorageSize, "storageSize", "", 10737418240, "The chain's storage size.")
+	cc.Flags().Int32VarP(&initNodeRequest.Port, "port", "", 9999, "The external port exposed by node.")
+	cc.Flags().StringVarP(&initNodeRequest.StorageClassName, "storageClassName", "", "", "The node's storage class name.")
+	cc.Flags().Int64VarP(&initNodeRequest.StorageSize, "storageSize", "", 10737418240, "The node's storage size.")
 	cc.Flags().StringVarP(&initNodeRequest.LogLevel, "logLevel", "", "info", "The node's log level.")
 
 	return cc

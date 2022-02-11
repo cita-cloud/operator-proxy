@@ -1,3 +1,19 @@
+/*
+ * Copyright Rivtower Technologies LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package command
 
 import (
@@ -36,8 +52,7 @@ func NewAccountCreateCommand() *cobra.Command {
 	cc.Flags().StringVarP(&createAccountRequest.Namespace, "namespace", "n", "cita", "The namespace that your node account create in k8s.")
 	cc.Flags().StringVarP(&createAccountRequest.Chain, "chain", "c", "", "The chain name corresponding to the node account.")
 	cc.Flags().StringVarP(&createAccountRequest.KmsPassword, "kmsPassword", "k", "", "The account kms password.")
-	cc.Flags().StringVarP(&role, "role", "r", "", "The node account kms password.")
-	convertRole(role)
+	cc.Flags().StringVarP(&role, "role", "r", "", "The role of node account(Admin/Consensus/Ordinary).")
 	cc.Flags().StringVarP(&createAccountRequest.Domain, "domain", "d", "", "The domain of node account.")
 
 	return cc
@@ -62,7 +77,7 @@ func accountCreateCommandFunc(cmd *cobra.Command, args []string) {
 	cli := newClientFromCmd(cmd)
 
 	createAccountRequest.Name = args[0]
-
+	convertRole(role)
 	resp, err := cli.AccountInterface.CreateAccount(ctx, &createAccountRequest)
 	if err != nil {
 		ExitWithError(ExitError, err)

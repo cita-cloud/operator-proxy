@@ -1,3 +1,19 @@
+/*
+ * Copyright Rivtower Technologies LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package command
 
 import (
@@ -5,12 +21,15 @@ import (
 	allinonepb "github.com/cita-cloud/operator-proxy/api/allinone"
 	chainpb "github.com/cita-cloud/operator-proxy/api/chain"
 	nodepb "github.com/cita-cloud/operator-proxy/api/node"
+	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 type printer interface {
 	// chain
 	InitChain(response *chainpb.ChainSimpleResponse)
+	OnlineChain(response *chainpb.ChainSimpleResponse)
 	ListChain(list *chainpb.ChainList)
+	DescribeChain(response *chainpb.ChainDescribeResponse)
 
 	// node
 	InitNode(response *nodepb.NodeSimpleResponse)
@@ -61,13 +80,16 @@ func makeChainListTable(list *chainpb.ChainList) (header []string, rows [][]stri
 	return header, rows
 }
 
-func makeNodeListTable(list *nodepb.NodeList) (header []string, rows [][]string) {
-	header = []string{"Name", "Namespace", "Status"}
-	for _, node := range list.Nodes {
+func makeNodeListTable(list []*nodepb.Node) (header []string, rows [][]string) {
+	header = []string{"Name", "Namespace", "Chain", "Account", "Size", "Status"}
+	for _, node := range list {
 		rows = append(rows, []string{
 			node.Name,
 			node.Namespace,
-			"",
+			node.GetChain(),
+			node.GetAccount(),
+			resource.NewQuantity(node.GetStorageSize(), resource.BinarySI).String(),
+			node.GetStatus().String(),
 		})
 	}
 	return header, rows

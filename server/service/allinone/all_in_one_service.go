@@ -1,3 +1,19 @@
+/*
+ * Copyright Rivtower Technologies LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package allinone
 
 import (
@@ -10,13 +26,11 @@ import (
 	pb "github.com/cita-cloud/operator-proxy/api/allinone"
 	chainpb "github.com/cita-cloud/operator-proxy/api/chain"
 	nodepb "github.com/cita-cloud/operator-proxy/api/node"
+	"github.com/cita-cloud/operator-proxy/pkg/utils"
 	"github.com/cita-cloud/operator-proxy/server/kubeapi"
 	accountsvc "github.com/cita-cloud/operator-proxy/server/service/account"
 	chainsvc "github.com/cita-cloud/operator-proxy/server/service/chain"
 	nodesvc "github.com/cita-cloud/operator-proxy/server/service/node"
-	"github.com/google/uuid"
-	"github.com/sethvargo/go-password/password"
-	"github.com/tjfoc/gmsm/sm3"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"k8s.io/apimachinery/pkg/types"
@@ -30,7 +44,7 @@ type allInOneServer struct {
 
 func setDefault(request *pb.AllInOneCreateRequest) {
 	if request.GetId() == "" {
-		request.Id = generateChainId(request.GetName())
+		request.Id = utils.GenerateChainId(request.GetName())
 	}
 	if request.GetTimestamp() == 0 {
 		request.Timestamp = time.Now().UnixMicro()
@@ -109,12 +123,12 @@ func (a allInOneServer) Create(ctx context.Context, request *pb.AllInOneCreateRe
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to init chain: %v", err)
 	}
-	adminPwd, err := generateAccountPassword()
+	adminPwd, err := utils.GenerateAccountPassword()
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to generate admin password: %v", err)
 	}
 	adminAccountReq := &accountpb.Account{
-		Name:        generateAccountOrNodeName(request.GetName()),
+		Name:        utils.GenerateAccountOrNodeName(request.GetName()),
 		Namespace:   request.GetNamespace(),
 		Chain:       request.GetName(),
 		KmsPassword: adminPwd,
@@ -129,18 +143,18 @@ func (a allInOneServer) Create(ctx context.Context, request *pb.AllInOneCreateRe
 
 	index := int32(1)
 	for index <= request.GetNodeCount() {
-		accountPwd, err := generateAccountPassword()
+		accountPwd, err := utils.GenerateAccountPassword()
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "failed to generate node account password: %v", err)
 		}
-		nodeAccountName := generateAccountOrNodeName(request.GetName())
+		nodeAccountName := utils.GenerateAccountOrNodeName(request.GetName())
 		nodeAccountReq := &accountpb.Account{
 			Name:        nodeAccountName,
 			Namespace:   request.GetNamespace(),
 			Chain:       request.GetName(),
 			KmsPassword: accountPwd,
 			Role:        accountpb.Role_Consensus,
-			Domain:      "",
+			Domain:      fmt.Sprintf("%s.citacloud.com", nodeAccountName),
 		}
 		_, err = accountsvc.NewAccountServer().CreateAccount(ctx, nodeAccountReq)
 		if err != nil {
@@ -177,13 +191,13 @@ func (a allInOneServer) Create(ctx context.Context, request *pb.AllInOneCreateRe
 
 	nodeNameList := make([]string, 0)
 	for _, nodeAccountName := range nodeAccountNameList {
-		nodeName := generateAccountOrNodeName(request.GetName())
+		nodeName := utils.GenerateAccountOrNodeName(request.GetName())
 		// create node
 		nodeReq := &nodepb.Node{
 			Name:      nodeName,
 			Namespace: request.GetNamespace(),
 			// todo modify this field
-			Cluster:          "k8s-1",
+			Cluster:          "all-in-one-k8s-cluster",
 			Account:          nodeAccountName,
 			Chain:            request.GetName(),
 			StorageSize:      request.GetStorageSize(),
@@ -218,7 +232,7 @@ func (a allInOneServer) checkChainAccount(ctx context.Context, namespace, name s
 	if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, chain); err != nil {
 		return false, nil
 	}
-	if chain.Status.AdminAccount != nil && len(chain.Status.ValidatorAccountMap) == int(nodeCount) {
+	if chain.Status.AdminAccount != nil && len(chain.Status.ValidatorAccountList) == int(nodeCount) {
 		return true, nil
 	}
 	return false, nil
@@ -263,32 +277,16 @@ func (a allInOneServer) checkNodeInitialized(ctx context.Context, namespace, nam
 		return false, nil
 	}
 	if node.Status.Status == citacloudv1.NodeInitialized {
-		if _, exist := chain.Status.NodeInfoMap[name]; exist {
-			return true, nil
-		} else {
-			return false, nil
+		for _, node := range chain.Status.NodeInfoList {
+			if node.Name == name {
+				return true, nil
+			}
 		}
+		return false, nil
 	}
 	return false, nil
 }
 
 func NewAllInOneServer() pb.AllInOneServiceServer {
 	return &allInOneServer{}
-}
-
-func generateChainId(name string) string {
-	h := sm3.New()
-	h.Write([]byte(name))
-	sum := h.Sum(nil)
-	return fmt.Sprintf("%x", sum)
-}
-
-func generateAccountOrNodeName(name string) string {
-	s := uuid.New().String()
-	return name + "-" + s[len(s)-12:]
-}
-
-func generateAccountPassword() (string, error) {
-	generate, err := password.Generate(16, 4, 4, false, false)
-	return generate, err
 }

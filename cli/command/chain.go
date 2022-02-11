@@ -1,19 +1,38 @@
+/*
+ * Copyright Rivtower Technologies LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package command
 
 import (
 	"errors"
 	"time"
 
-	pb "github.com/cita-cloud/operator-proxy/api/chain"
 	"github.com/spf13/cobra"
+
+	pb "github.com/cita-cloud/operator-proxy/api/chain"
 )
 
 var (
 	IllegalEnumValue = errors.New("illegal enum value")
 	initChainRequest = pb.Chain{}
 
-	consensusType    string
-	listChainRequest = pb.ListChainRequest{}
+	consensusType        string
+	onlineChainRequest   = pb.ChainOnlineRequest{}
+	listChainRequest     = pb.ListChainRequest{}
+	describeChainRequest = pb.ChainDescribeRequest{}
 )
 
 func NewChainCommand() *cobra.Command {
@@ -23,7 +42,9 @@ func NewChainCommand() *cobra.Command {
 	}
 
 	cc.AddCommand(NewChainInitCommand())
+	cc.AddCommand(NewChainOnlineCommand())
 	cc.AddCommand(NewChainListCommand())
+	cc.AddCommand(NewChainDescribeCommand())
 
 	return cc
 }
@@ -82,6 +103,37 @@ func chainInitCommandFunc(cmd *cobra.Command, args []string) {
 	display.InitChain(resp)
 }
 
+func NewChainOnlineCommand() *cobra.Command {
+	cc := &cobra.Command{
+		Use:   "online <chain name>",
+		Short: "Online a chain into the k8s cluster",
+
+		Run: chainOnlineCommandFunc,
+	}
+
+	cc.Flags().StringVarP(&onlineChainRequest.Namespace, "namespace", "n", "cita", "The namespace that your chain in k8s.")
+
+	return cc
+}
+
+func chainOnlineCommandFunc(cmd *cobra.Command, args []string) {
+	// create grpc client
+	ctx, cancel := commandCtx(cmd)
+	defer func() {
+		cancel()
+	}()
+	cli := newClientFromCmd(cmd)
+
+	onlineChainRequest.Name = args[0]
+
+	resp, err := cli.ChainInterface.Online(ctx, &onlineChainRequest)
+	if err != nil {
+		ExitWithError(ExitError, err)
+	}
+
+	display.OnlineChain(resp)
+}
+
 func NewChainListCommand() *cobra.Command {
 	cc := &cobra.Command{
 		Use:   "list [options]",
@@ -109,4 +161,35 @@ func chainListCommandFunc(cmd *cobra.Command, args []string) {
 	}
 
 	display.ListChain(resp)
+}
+
+func NewChainDescribeCommand() *cobra.Command {
+	cc := &cobra.Command{
+		Use:   "describe [options]",
+		Short: "Show chain detail in the k8s cluster",
+
+		Run: chainDescribeCommandFunc,
+	}
+
+	cc.Flags().StringVarP(&describeChainRequest.Namespace, "namespace", "n", "cita", "The namespace that your chain in k8s.")
+
+	return cc
+}
+
+func chainDescribeCommandFunc(cmd *cobra.Command, args []string) {
+	// create grpc client
+	ctx, cancel := commandCtx(cmd)
+	defer func() {
+		cancel()
+	}()
+	cli := newClientFromCmd(cmd)
+
+	describeChainRequest.Name = args[0]
+
+	resp, err := cli.ChainInterface.Describe(ctx, &describeChainRequest)
+	if err != nil {
+		ExitWithError(ExitError, err)
+	}
+
+	display.DescribeChain(resp)
 }

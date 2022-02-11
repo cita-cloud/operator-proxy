@@ -1,3 +1,19 @@
+/*
+ * Copyright Rivtower Technologies LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package command
 
 import (
@@ -38,9 +54,9 @@ func NewNodeInitCommand() *cobra.Command {
 	cc.Flags().StringVarP(&initNodeRequest.Chain, "chain", "", "", "The chain name corresponding to the node.")
 	cc.Flags().StringVarP(&initNodeRequest.Account, "account", "a", "", "The account name corresponding to the node.")
 	cc.Flags().StringVarP(&initNodeRequest.ExternalIp, "externalIp", "", "", "The external ip exposed by node.")
-	cc.Flags().Int32VarP(&initNodeRequest.Port, "port", "", 9999, "The external ip exposed by node.")
-	cc.Flags().StringVarP(&initNodeRequest.StorageClassName, "storageClassName", "", "", "The node's storage class.")
-	cc.Flags().Int64VarP(&initNodeRequest.StorageSize, "storageSize", "", 10737418240, "The chain's storage size.")
+	cc.Flags().Int32VarP(&initNodeRequest.Port, "port", "", 9999, "The external port exposed by node.")
+	cc.Flags().StringVarP(&initNodeRequest.StorageClassName, "storageClassName", "", "", "The node's storage class name.")
+	cc.Flags().Int64VarP(&initNodeRequest.StorageSize, "storageSize", "", 10737418240, "The node's storage size.")
 	cc.Flags().StringVarP(&initNodeRequest.LogLevel, "logLevel", "", "info", "The node's log level.")
 
 	return cc

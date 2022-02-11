@@ -1,17 +1,34 @@
+/*
+ * Copyright Rivtower Technologies LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package node
 
 import (
 	"context"
 
-	citacloudv1 "github.com/cita-cloud/cita-cloud-operator/api/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/pointer"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	citacloudv1 "github.com/cita-cloud/cita-cloud-operator/api/v1"
 
 	pb "github.com/cita-cloud/operator-proxy/api/node"
 	"github.com/cita-cloud/operator-proxy/server/kubeapi"
+	"github.com/cita-cloud/operator-proxy/server/service/resource"
 )
 
 var _ pb.NodeServiceServer = &nodeServer{}
@@ -45,30 +62,9 @@ func (n nodeServer) Init(ctx context.Context, node *pb.Node) (*pb.NodeSimpleResp
 }
 
 func (n nodeServer) List(ctx context.Context, request *pb.ListNodeRequest) (*pb.NodeList, error) {
-	nodeCrList := &citacloudv1.ChainNodeList{}
-	nodeCrOpts := []client.ListOption{
-		client.InNamespace(request.GetNamespace()),
-	}
-	if request.GetChain() != "" {
-		nodeCrOpts = append(nodeCrOpts, client.MatchingFields{"spec.chain": request.GetChain()})
-	}
-	if err := kubeapi.K8sClient.List(ctx, nodeCrList, nodeCrOpts...); err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to list account cr", err)
-	}
-	nodeList := make([]*pb.Node, 0)
-	for _, nodeCr := range nodeCrList.Items {
-		node := &pb.Node{
-			Name:             nodeCr.Name,
-			Namespace:        nodeCr.Namespace,
-			Cluster:          nodeCr.Spec.Cluster,
-			Chain:            nodeCr.Spec.ChainName,
-			Account:          nodeCr.Spec.Account,
-			ExternalIp:       nodeCr.Spec.ExternalIp,
-			Port:             nodeCr.Spec.Port,
-			StorageSize:      *nodeCr.Spec.StorageSize,
-			StorageClassName: *nodeCr.Spec.StorageClassName,
-		}
-		nodeList = append(nodeList, node)
+	nodeList, err := resource.GetNodeList(ctx, request.GetNamespace(), request.GetChain())
+	if err != nil {
+		return nil, err
 	}
 	return &pb.NodeList{Nodes: nodeList}, status.New(codes.OK, "").Err()
 }

@@ -12,15 +12,15 @@
 
 ### `operator-proxy`的安装
 - 安装Chart仓库
-```
+```shell
 helm repo add cita-cloud-operator-proxy https://cita-cloud.github.io/operator-proxy
 ```
 - 创建安装`operator-proxy`的命名空间
-```
+```shell
 kubectl create ns cita
 ```
 - 执行安装
-```
+```shell
 helm install cita-cloud-operator-proxy cita-cloud-operator-proxy/cita-cloud-operator-proxy -n=cita
 ```
 - 验证安装
@@ -35,16 +35,16 @@ kubectl get pod -ncita | grep cita-cloud-operator-proxy
 
 - 设置环境变量(以`Linux`为例)
 获得`operator-proxy`暴露的`NodePort`端口(示例中为30194)
-```
+```shell
 kubectl describe service cita-cloud-operator-proxy -ncita | grep NodePort
 ```
 设置环境变量，以`Kubernetes`集群的任意一个节点`IP`和`NodePort`端口作为`endpoint`
-```
+```shell
 export OPERATOR_PROXY_ENDPOINT=192.168.10.120:30194
 ```
 
 - 执行帮助命令
-```
+```shell
 cco-cli -h
 The cita-cloud operator command line interface lets you create and manage CITA-CLOUD chain.
 
@@ -55,7 +55,172 @@ Usage:
 示例
 ----
 
-### 创建一条名为`test-chain`的链(默认3节点)
-```
+### 创建一条名为`test-chain`的链(默认3节点，并创建在名为`cita`的环境变量中)
+该命令是多个子命令的集合
+```shell
 cco-cli all-in-one create test-chain
+```
+可以看到有3个`Pod`被创建出来
+```shell
+kubectl get pod -ncita
+NAME                                          READY   STATUS    RESTARTS   AGE
+test-chain-9ba8b85938c7-0                     6/6     Running   0          18h
+test-chain-af41db9a3064-0                     6/6     Running   0          18h
+test-chain-efe071517f54-0                     6/6     Running   0          18h
+```
+
+### chain command
+```shell
+$ cco-cli chain -h
+Chain related commands
+
+Usage:
+  cco-cli chain [command]
+
+Available Commands:
+  describe    Show chain detail in the k8s cluster
+  init        Initialize a chain into the k8s cluster
+  list        List chain in the k8s cluster
+  online      Online a chain into the k8s cluster
+```
+
+- 初始化一条名为`test-chain`的链
+```shell
+$ cco-cli chain init test-chain
+init chain [cita/test-chain] success
+```
+- 此时，这条链的状态为`Publicizing`，代表该链的信息需要向各参与方公示，可以通过`describe`命令查看详情
+```shell
+$ cco-cli chain describe test-chain
+Chain Base Info:
++-----------------+--------------------------------------------------------------------+
+|      FIELD      |                               VALUE                                |
++-----------------+--------------------------------------------------------------------+
+| Name            | test-chain                                                         |
+| Namespace       | cita                                                               |
+| Id              | 63586a3c0255f337c77a777ff54f0040b8c388da04f23ecee6bfd4953a6512b4   |
+| Timestamp       | 1644466132459760                                                   |
+| PrevHash        | 0x0000000000000000000000000000000000000000000000000000000000000000 |
+| BlockInterval   | 3                                                                  |
+| BlockLimit      | 100                                                                |
+| EnableTls       | false                                                              |
+| ConsensusType   | Raft                                                               |
+| NetworkImage    | citacloud/network_p2p:v6.3.0                                       |
+| ConsensusImage  | citacloud/consensus_raft:v6.3.0                                    |
+| ExecutorImage   | citacloud/executor_evm:v6.3.0                                      |
+| StorageImage    | citacloud/storage_rocksdb:v6.3.0                                   |
+| ControllerImage | citacloud/controller:v6.3.0                                        |
+| KmsImage        | citacloud/kms_sm:v6.3.0                                            |
+| Status          | Online                                                             |
++-----------------+--------------------------------------------------------------------+
+Admin Account:
++-------+-----------+------------+-------+--------+
+| NAME  | NAMESPACE |   CHAIN    | ROLE  | DOMAIN |
++-------+-----------+------------+-------+--------+
+| admin |   cita    | test-chain | Admin |        |
++-------+-----------+------------+-------+--------+
+Node Info:
++--------+-----------+------------+---------+------+---------+
+|  NAME  | NAMESPACE |   CHAIN    | ACCOUNT | SIZE | STATUS  |
++--------+-----------+------------+---------+------+---------+
+| node-1 |   cita    | test-chain |  alice  | 10Gi | Running |
+| node-2 |   cita    | test-chain |   bob   | 10Gi | Running |
+| node-3 |   cita    | test-chain | carlos  | 10Gi | Running |
++--------+-----------+------------+---------+------+---------+
+```
+- 经各方确认通过后，上线这条链，上线前需要创建好`Admin`账户和共识节点账户，参考[account command](#account command)
+```shell
+$ cco-cli chain online test-chain
+online chain [cita/test-chain] success
+```
+- 查看一条链的详情
+```shell
+$ cco-cli chain describe test-chain
+
+```
+- 列出命名空间下的所有链
+```shell
+$ cco-cli chain list -n cita
++------------+-----------+--------+
+|    NAME    | NAMESPACE | STATUS |
++------------+-----------+--------+
+| test-chain |   cita    | Online |
++------------+-----------+--------+
+```
+
+### account command
+```shell
+$ cco-cli account -h
+Account related commands
+
+Usage:
+  cco-cli account [command]
+
+Available Commands:
+  create      Create a node account for chain
+  list        List node account in the k8s cluster
+```
+- 创建`Admin`账户: `admin`
+```shell
+$ cco-cli account create admin --chain test-chain --kmsPassword 123456 --role Admin
+create account [cita/admin] success
+```
+- 创建共识账户: `alice`
+```shell
+$ cco-cli account create alice --chain test-chain --kmsPassword 123456 --role Consensus
+create account [cita/alice] success
+```
+- 创建普通账户: `davis`
+```shell
+$ cco-cli account create davis --chain test-chain --kmsPassword 123456 --role Ordinary
+create account [cita/davis] success
+```
+- 查看命名空间下所有用户
+```shell
+$ cco-cli account list -n cita
++--------+-----------+------------+-----------+--------+
+|  NAME  | NAMESPACE |   CHAIN    |   ROLE    | DOMAIN |
++--------+-----------+------------+-----------+--------+
+| admin  |   cita    | test-chain |   Admin   |        |
+| alice  |   cita    | test-chain | Consensus |        |
+|  bob   |   cita    | test-chain | Consensus |        |
+| carlos |   cita    | test-chain | Consensus |        |
+| davis  |   cita    | test-chain | Ordinary  |        |
++--------+-----------+------------+-----------+--------+
+```
+
+### node command
+```shell
+$ cco-cli node -h
+Node related commands
+
+Usage:
+  cco-cli node [command]
+
+Available Commands:
+  init        Init a node for chain
+  list        List node in the k8s cluster
+  start       Start a node
+```
+- 初始化链下的一个节点：node1，需匹配对应的链名和账户，cluster参数为当前Kubernetes的集群名
+可初始化与共识账户对应的节点数量
+```shell
+$ cco-cli node init node-1 --account alice --chain test-chain --cluster k8s-1 --storageClassName nas-client-provisioner --storageSize 10737418240
+init node [cita/node-1] success
+```
+- 启动对应的各个节点
+```shell
+$ cco-cli node start node-1
+start node [cita/node-1] success
+```
+- 列出对应链下的所有节点
+```shell
+$ cco-cli node list --chain test-chain
++--------+-----------+------------+---------+------+---------+
+|  NAME  | NAMESPACE |   CHAIN    | ACCOUNT | SIZE | STATUS  |
++--------+-----------+------------+---------+------+---------+
+| node-2 |   cita    | test-chain |   bob   | 10Gi | Running |
+| node-3 |   cita    | test-chain | carlos  | 10Gi | Running |
+| node-1 |   cita    | test-chain |  alice  | 10Gi | Running |
++--------+-----------+------------+---------+------+---------+
 ```

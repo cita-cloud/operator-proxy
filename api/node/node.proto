@@ -13,18 +13,20 @@ message Node {
   int64 storageSize = 13;
   string storageClassName = 14;
   string logLevel = 15;
+  Status status = 16;
 }
 
 enum Status {
-  WaitChainOnline = 0;
-  Initialized = 1;
-  Starting = 2;
-  Running = 3;
-  Warning = 4;
-  Error = 5;
-  Updating = 6;
-  Stopping = 7;
-  Stopped = 8;
+  Unknown = 0;
+  WaitChainOnline = 1;
+  Initialized = 2;
+  Starting = 3;
+  Running = 4;
+  Warning = 5;
+  Error = 6;
+  Updating = 7;
+  Stopping = 8;
+  Stopped = 9;
 }
 
 message NodeSimpleResponse {

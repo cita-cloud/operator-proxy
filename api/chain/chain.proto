@@ -2,6 +2,8 @@ syntax = "proto3";
 package chain;
 option go_package = "github.com/cita-cloud/operator-proxy/api/chain";
 
+import "api/node/node.proto";
+import "api/account/account.proto";
 
 message Chain {
   string name = 1;
@@ -22,13 +24,15 @@ message Chain {
 }
 
 enum ConsensusType {
-  BFT = 0;
-  Raft = 1;
+  UnknownConsensusType = 0;
+  BFT = 1;
+  Raft = 2;
 }
 
 enum Status {
-  Online = 0;
-  Publicizing = 1;
+  UnknownStatus = 0;
+  Online = 1;
+  Publicizing = 2;
 }
 
 
@@ -51,8 +55,35 @@ message ChainOnlineRequest {
   string namespace = 2;
 }
 
+message ChainDescribeRequest {
+  string name = 1;
+  string namespace = 2;
+}
+
+message ChainDescribeResponse {
+  string name = 1;
+  string namespace = 2;
+  string id = 3;
+  int64 timestamp = 4;
+  string prevHash = 5;
+  int32 blockInterval = 6;
+  int32 blockLimit = 7;
+  bool enableTls = 8;
+  ConsensusType consensusType = 9;
+  string networkImage = 10;
+  string consensusImage = 11;
+  string executorImage = 12;
+  string storageImage = 13;
+  string controllerImage = 14;
+  string kmsImage = 15;
+  repeated node.Node nodes = 16;
+  account.Account adminAccount = 17;
+  Status status = 18;
+}
+
 service ChainService {
   rpc Init(Chain) returns (ChainSimpleResponse);
   rpc List(ListChainRequest) returns (ChainList);
   rpc Online(ChainOnlineRequest) returns (ChainSimpleResponse);
+  rpc Describe(ChainDescribeRequest) returns (ChainDescribeResponse);
 }

@@ -12,8 +12,7 @@ fmt:
 	go fmt ./...
 
 protoc-image-build:
-	docker build --network=host -t $(PROTOC_IMAGE_NAME):$(PROTOC_IMAGE_VERSION) -f ./Dockerfile-protoc-3.19.1 .
-	#docker build -t $(PROTOC_IMAGE_NAME):$(PROTOC_IMAGE_VERSION) -f ./Dockerfile-protoc-3.19.1 .
+	docker build --platform linux/arm64 --network=host -t $(PROTOC_IMAGE_NAME):$(PROTOC_IMAGE_VERSION) -f ./Dockerfile-protoc-3.19.1 .
 
 protoc-image-push:
 	docker push $(PROTOC_IMAGE_NAME):$(PROTOC_IMAGE_VERSION)
@@ -28,16 +27,16 @@ linux-cli: GO_ENV += GOOS=linux GOARCH=amd64
 linux-cli:
 	$(GO_BUILD) -o bin/cco-cli ./cli
 
-mac-cli: GO_ENV += GOOS=darwin GOARCH=amd64
+mac-cli: GO_ENV += GOOS=darwin GOARCH=arm64
 mac-cli:
-	$(GO_BUILD) -o bin/cco-cli-mac ./cli
+	$(GO_BUILD) -o bin/cco-cli ./cli
 
 win-cli: GO_ENV += GOOS=windows GOARCH=386
 win-cli:
 	$(GO_BUILD) -o bin/cco-cli.exe ./cli
 
 docker-build: ## Build docker image with the manager.
-	docker build -t ${IMG} .
+	docker build --platform linux/amd64 -t ${IMG} .
 
 docker-push: ## Push docker image with the manager.
 	docker push ${IMG}

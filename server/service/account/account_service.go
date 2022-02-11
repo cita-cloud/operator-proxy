@@ -1,3 +1,19 @@
+/*
+ * Copyright Rivtower Technologies LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package account
 
 import (
@@ -84,4 +100,32 @@ func convertProtoToSpec(role pb.Role) citacloudv1.Role {
 	} else {
 		return citacloudv1.Ordinary
 	}
+}
+
+func GetAdminAccountByChain(ctx context.Context, namespace, chainName string) (*pb.Account, error) {
+	accountCrList := &citacloudv1.AccountList{}
+	accountCrOpts := []client.ListOption{
+		client.InNamespace(namespace),
+	}
+	accountCrOpts = append(accountCrOpts, client.MatchingFields{"spec.chain": chainName})
+	if err := kubeapi.K8sClient.List(ctx, accountCrList, accountCrOpts...); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to list account cr", err)
+	}
+	if len(accountCrList.Items) == 0 {
+		return nil, nil
+	}
+	for _, account := range accountCrList.Items {
+		if account.Spec.Role == citacloudv1.Admin {
+			res := &pb.Account{
+				Name:        account.Name,
+				Namespace:   account.Namespace,
+				Chain:       chainName,
+				KmsPassword: account.Spec.KmsPassword,
+				Role:        pb.Role_Admin,
+				Domain:      account.Spec.Domain,
+			}
+			return res, nil
+		}
+	}
+	return nil, nil
 }

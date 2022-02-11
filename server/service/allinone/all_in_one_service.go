@@ -232,7 +232,7 @@ func (a allInOneServer) checkChainAccount(ctx context.Context, namespace, name s
 	if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, chain); err != nil {
 		return false, nil
 	}
-	if chain.Status.AdminAccount != nil && len(chain.Status.ValidatorAccountMap) == int(nodeCount) {
+	if chain.Status.AdminAccount != nil && len(chain.Status.ValidatorAccountList) == int(nodeCount) {
 		return true, nil
 	}
 	return false, nil
@@ -277,11 +277,12 @@ func (a allInOneServer) checkNodeInitialized(ctx context.Context, namespace, nam
 		return false, nil
 	}
 	if node.Status.Status == citacloudv1.NodeInitialized {
-		if _, exist := chain.Status.NodeInfoMap[name]; exist {
-			return true, nil
-		} else {
-			return false, nil
+		for _, node := range chain.Status.NodeInfoList {
+			if node.Name == name {
+				return true, nil
+			}
 		}
+		return false, nil
 	}
 	return false, nil
 }

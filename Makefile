@@ -20,20 +20,27 @@ protoc-image-push:
 grpc-code-generate:
 	docker run -v $(PWD):/src -e GO111MODULE=on $(PROTOC_IMAGE_NAME):$(PROTOC_IMAGE_VERSION) /bin/bash ./grpc-code-generate.sh
 
+LD_FLAGS=-ldflags " \
+    -X $(shell go list -m)/cli/command.ClientVersion=0.0.1 \
+    -X $(shell go list -m)/cli/command.Goos=$(shell go env GOOS) \
+    -X $(shell go list -m)/cli/command.Goarch=$(shell go env GOARCH) \
+    -X $(shell go list -m)/cli/command.GitCommit=$(shell git rev-parse HEAD) \
+    -X $(shell go list -m)/cli/command.BuildDate=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') \
+    "
 
 build: fmt linux-cli mac-cli win-cli
 
 linux-cli: GO_ENV += GOOS=linux GOARCH=amd64
 linux-cli:
-	$(GO_BUILD) -o bin/cco-cli ./cli
+	$(GO_BUILD) $(LD_FLAGS) -o bin/cco-cli ./cli
 
 mac-cli: GO_ENV += GOOS=darwin GOARCH=arm64
 mac-cli:
-	$(GO_BUILD) -o bin/cco-cli ./cli
+	$(GO_BUILD) $(LD_FLAGS) -o bin/cco-cli ./cli
 
 win-cli: GO_ENV += GOOS=windows GOARCH=386
 win-cli:
-	$(GO_BUILD) -o bin/cco-cli.exe ./cli
+	$(GO_BUILD) $(LD_FLAGS) -o bin/cco-cli.exe ./cli
 
 docker-build: ## Build docker image with the manager.
 	docker build --platform linux/amd64 -t ${IMG} .

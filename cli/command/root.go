@@ -57,7 +57,8 @@ func init() {
 		NewChainCommand(),
 		NewNodeCommand(),
 		NewAccountCommand(),
-		NewAllInOneCommand())
+		NewAllInOneCommand(),
+		NewVersionCommand())
 }
 
 func getEndPoint() string {

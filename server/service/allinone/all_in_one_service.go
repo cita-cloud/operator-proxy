@@ -118,6 +118,7 @@ func (a allInOneServer) Create(ctx context.Context, request *pb.AllInOneCreateRe
 		StorageImage:    request.GetStorageImage(),
 		ControllerImage: request.GetControllerImage(),
 		KmsImage:        request.GetKmsImage(),
+		Version:         request.GetVersion(),
 	}
 	_, err := chainsvc.NewChainServer().Init(ctx, initChainReq)
 	if err != nil {

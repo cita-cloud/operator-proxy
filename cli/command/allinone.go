@@ -19,6 +19,7 @@ package command
 import (
 	"time"
 
+	citacloudv1 "github.com/cita-cloud/cita-cloud-operator/api/v1"
 	pb "github.com/cita-cloud/operator-proxy/api/allinone"
 	chainpb "github.com/cita-cloud/operator-proxy/api/chain"
 	"github.com/spf13/cobra"
@@ -68,6 +69,7 @@ func NewAllInOneCreateCommand() *cobra.Command {
 	cc.Flags().StringVarP(&allInOneCreateRequest.LogLevel, "logLevel", "", "info", "The node's log level.")
 
 	cc.Flags().Int32VarP(&allInOneCreateRequest.NodeCount, "nodeCount", "", 3, "The node count for chain start.")
+	cc.Flags().StringVarP(&allInOneCreateRequest.Version, "version", "v", citacloudv1.LATEST_VERSION, "The chain's main version.")
 
 	return cc
 }

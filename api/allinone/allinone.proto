@@ -24,6 +24,7 @@ message AllInOneCreateRequest {
   int64 storageSize = 17;
   string storageClassName = 18;
   string logLevel = 19;
+  string version = 20;
 }
 
 message AllInOneCreateResponse {

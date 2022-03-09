@@ -39,78 +39,71 @@ var _ pb.ChainServiceServer = &chainServer{}
 type chainServer struct {
 }
 
-func setDefault(request *pb.Chain) {
+func (c chainServer) setDefault(request *pb.Chain) (*citacloudv1.ChainConfig, error) {
+	chainConfig := &citacloudv1.ChainConfig{}
+	chainConfig.Name = request.GetName()
+	chainConfig.Namespace = request.GetNamespace()
+
 	if request.GetId() == "" {
 		request.Id = utils.GenerateChainId(request.GetName())
 	}
+	chainConfig.Spec.Id = request.GetId()
+
 	if request.GetTimestamp() == 0 {
 		request.Timestamp = time.Now().UnixMicro()
 	}
+	chainConfig.Spec.Timestamp = request.GetTimestamp()
+
 	if request.GetPrevHash() == "" {
 		request.PrevHash = "0x0000000000000000000000000000000000000000000000000000000000000000"
 	}
+	chainConfig.Spec.PrevHash = request.GetPrevHash()
+
 	if request.GetBlockInterval() == 0 {
 		request.BlockInterval = 3
 	}
+	chainConfig.Spec.BlockInterval = request.GetBlockInterval()
+
 	if request.GetBlockLimit() == 0 {
 		request.BlockLimit = 100
 	}
-	if request.GetNetworkImage() == "" {
-		if request.GetEnableTls() {
-			request.NetworkImage = "citacloud/network_tls:v6.3.0"
-		} else {
-			request.NetworkImage = "citacloud/network_p2p:v6.3.0"
-		}
-	}
-	if request.GetConsensusImage() == "" {
-		if request.ConsensusType == pb.ConsensusType_Raft {
-			request.ConsensusImage = "citacloud/consensus_raft:v6.3.0"
-		} else if request.ConsensusType == pb.ConsensusType_BFT {
-			request.ConsensusImage = "citacloud/consensus_bft:v6.3.0"
-		}
-	}
-	if request.GetExecutorImage() == "" {
-		request.ExecutorImage = "citacloud/executor_evm:v6.3.0"
-	}
-	if request.GetStorageImage() == "" {
-		request.StorageImage = "citacloud/storage_rocksdb:v6.3.0"
-	}
-	if request.GetControllerImage() == "" {
-		request.ControllerImage = "citacloud/controller:v6.3.0"
-	}
-	if request.GetKmsImage() == "" {
-		request.KmsImage = "citacloud/kms_sm:v6.3.0"
-	}
-}
+	chainConfig.Spec.BlockLimit = request.GetBlockLimit()
 
-func (c chainServer) Init(ctx context.Context, chain *pb.Chain) (*pb.ChainSimpleResponse, error) {
-	setDefault(chain)
-	chainConfig := &citacloudv1.ChainConfig{}
-	chainConfig.Name = chain.GetName()
-	chainConfig.Namespace = chain.GetNamespace()
-	chainConfig.Spec.Id = chain.GetId()
-	chainConfig.Spec.Timestamp = chain.GetTimestamp()
-	chainConfig.Spec.PrevHash = chain.GetPrevHash()
-	chainConfig.Spec.BlockInterval = chain.GetBlockInterval()
-	chainConfig.Spec.BlockLimit = chain.GetBlockLimit()
-	chainConfig.Spec.EnableTLS = chain.GetEnableTls()
-	chainConfig.Spec.ConsensusType = convertProtoToSpec(chain.GetConsensusType())
+	chainConfig.Spec.EnableTLS = request.GetEnableTls()
+	chainConfig.Spec.ConsensusType = convertProtoToSpec(request.GetConsensusType())
 	// default status is Publicizing
 	chainConfig.Spec.Action = citacloudv1.Publicizing
-	chainConfig.Spec.NetworkImage = chain.GetNetworkImage()
-	chainConfig.Spec.ConsensusImage = chain.GetConsensusImage()
-	chainConfig.Spec.ExecutorImage = chain.GetExecutorImage()
-	chainConfig.Spec.StorageImage = chain.GetStorageImage()
-	chainConfig.Spec.ControllerImage = chain.GetControllerImage()
-	chainConfig.Spec.KmsImage = chain.GetKmsImage()
 
-	err := kubeapi.K8sClient.Create(ctx, chainConfig)
+	if request.GetVersion() == "" {
+		chainConfig.Spec.Version = citacloudv1.LATEST_VERSION
+	}
+	chainConfig.Spec.Version = request.GetVersion()
+
+	exactVersion, err := chainConfig.GetExactVersion()
+	if err != nil {
+		return nil, err
+	}
+
+	defaultImageInfo := citacloudv1.VERSION_MAP[exactVersion]
+	// merge
+	chainConfig.MergeFromDefaultImageInfo(defaultImageInfo)
+
+	return chainConfig, nil
+}
+
+func (c chainServer) Init(ctx context.Context, request *pb.Chain) (*pb.ChainSimpleResponse, error) {
+	chainConfig, err := c.setDefault(request)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to set default chain cr", err)
+	}
+
+	err = kubeapi.K8sClient.Create(ctx, chainConfig)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create chain cr", err)
 	}
 	return &pb.ChainSimpleResponse{
-		Name:      chain.GetName(),
-		Namespace: chain.GetNamespace(),
+		Name:      request.GetName(),
+		Namespace: request.GetNamespace(),
 		Status:    pb.Status_Publicizing,
 	}, status.New(codes.OK, "").Err()
 }

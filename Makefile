@@ -28,14 +28,22 @@ LD_FLAGS=-ldflags " \
     -X $(shell go list -m)/cli/command.BuildDate=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') \
     "
 
-build: fmt linux-cli mac-cli win-cli
+build: fmt linux-amd-cli linux-arm-cli mac-amd-cli mac-arm-cli win-cli
 
-linux-cli: GO_ENV += GOOS=linux GOARCH=amd64
-linux-cli:
+linux-amd-cli: GO_ENV += GOOS=linux GOARCH=amd64
+linux-amd-cli:
 	$(GO_BUILD) $(LD_FLAGS) -o bin/cco-cli ./cli
 
-mac-cli: GO_ENV += GOOS=darwin GOARCH=arm64
-mac-cli:
+linux-arm-cli: GO_ENV += GOOS=linux GOARCH=arm64
+linux-arm-cli:
+	$(GO_BUILD) $(LD_FLAGS) -o bin/cco-cli ./cli
+
+mac-amd-cli: GO_ENV += GOOS=darwin GOARCH=amd64
+mac-amd-cli:
+	$(GO_BUILD) $(LD_FLAGS) -o bin/cco-cli ./cli
+
+mac-arm-cli: GO_ENV += GOOS=darwin GOARCH=arm64
+mac-arm-cli:
 	$(GO_BUILD) $(LD_FLAGS) -o bin/cco-cli ./cli
 
 win-cli: GO_ENV += GOOS=windows GOARCH=386

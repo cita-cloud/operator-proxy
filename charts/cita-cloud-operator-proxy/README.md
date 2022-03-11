@@ -20,8 +20,8 @@ Kubernetes: `>=1.18.0-0`
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| global.registry | string | `"registry.devops.rivtower.com"` | You can specify the image registry. |
-| global.repository | string | `"cita-cloud/operator"` | You can specify the image repository. |
+| global.registry | string | `"docker.io"` | You can specify the image registry. |
+| global.repository | string | `"citacloud"` | You can specify the image repository. |
 | image.pullPolicy | string | `"IfNotPresent"` | You can specify the image pull policy. |
 | image.tag | string | `"v0.0.1"` | You can specify the image tag. |
 | replicas | int | `1` | You can specify the replica count. |

@@ -1,8 +1,8 @@
 global:
   # global.registry -- You can specify the image registry.
-  registry: registry.devops.rivtower.com
+  registry: docker.io
   # global.repository -- You can specify the image repository.
-  repository: cita-cloud/operator
+  repository: citacloud
 
 image:
   # image.pullPolicy -- You can specify the image pull policy.

@@ -1,8 +1,11 @@
 GO_BUILD = $(GO_CMD) build
 GO_CMD = $(GO_ENV) go
 
-#IMG ?= citacloud/operator-proxy:v0.0.1
-IMG ?= registry.devops.rivtower.com/cita-cloud/operator/operator-proxy:v0.0.1
+DEV_IMG ?= registry.devops.rivtower.com/cita-cloud/operator/operator-proxy:v0.0.1
+IMG ?= citacloud/operator-proxy
+
+VERSION=$(shell git describe --tags --match 'v*' --always --dirty)
+GIT_COMMIT?=$(shell git rev-parse --short HEAD)
 
 PROTOC_IMAGE_NAME=registry.devops.rivtower.com/cita-cloud/operator/protoc
 PROTOC_IMAGE_VERSION=3.19.1
@@ -50,8 +53,22 @@ win-cli: GO_ENV += GOOS=windows GOARCH=386
 win-cli:
 	$(GO_BUILD) $(LD_FLAGS) -o bin/cco-cli.exe ./cli
 
-docker-build: ## Build docker image with the manager.
-	docker build --platform linux/amd64 -t ${IMG} .
+.PHONY: dev-build
+dev-build: ## Build dev image with the manager.
+	docker build --platform linux/amd64 -t ${DEV_IMG} . --build-arg version=$(GIT_COMMIT)
 
-docker-push: ## Push docker image with the manager.
-	docker push ${IMG}
+.PHONY: dev-push
+dev-push: ## Push dev image with the manager.
+	docker push ${DEV_IMG}
+
+.PHONY: image-latest
+image-latest:
+	# Build image with latest stable
+	docker buildx build -t $(IMG):latest --build-arg version=$(GIT_COMMIT) \
+    		--platform linux/amd64,linux/arm64 . --push
+
+.PHONY: image-version
+image-version:
+	[ -z `git status --porcelain` ] || (git --no-pager diff && exit 255)
+	docker buildx build -t $(IMG):$(VERSION) --build-arg version=$(GIT_COMMIT) \
+		--platform linux/amd64,linux/arm64 . --push

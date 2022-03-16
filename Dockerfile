@@ -15,6 +15,7 @@ RUN go mod download
 # # Build
 COPY api/ api/
 COPY server/ server/
+COPY pkg/ pkg/
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o operator-proxy server/main.go
 #

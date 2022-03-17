@@ -1,0 +1,18 @@
+header:
+  license:
+    spdx-id: Apache-2.0
+    copyright-owner: Rivtower Technologies LLC.
+  paths-ignore:
+    - '**/.github/**'
+    - '.github/.licenserc.yaml'
+    - '.gitignore'
+    - 'Dockerfile'
+    - 'Dockerfile-protoc-3.19.1'
+    - 'LICENSE'
+    - 'Makefile'
+    - 'README.md'
+    - 'api/**'
+    - 'charts/**'
+    - 'go.mod'
+    - 'go.sum'
+    - 'grpc-code-generate.sh'

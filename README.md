@@ -11,7 +11,7 @@
 `cita-cloud-operator`的`Helm`安装方式建该链接: <https://github.com/cita-cloud/cita-cloud-operator>
 
 ### `operator-proxy`的安装
-- 安装Chart仓库
+- 添加Chart仓库
 ```shell
 helm repo add cita-cloud-operator-proxy https://cita-cloud.github.io/operator-proxy
 ```

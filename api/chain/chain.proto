@@ -21,6 +21,7 @@ message Chain {
   string storageImage = 13;
   string controllerImage = 14;
   string kmsImage = 15;
+  string version = 16;
 }
 
 enum ConsensusType {

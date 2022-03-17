@@ -34,6 +34,7 @@ var (
 	onlineChainRequest   = pb.ChainOnlineRequest{}
 	listChainRequest     = pb.ListChainRequest{}
 	describeChainRequest = pb.ChainDescribeRequest{}
+	deleteChainRequest   = pb.ChainDeleteRequest{}
 )
 
 func NewChainCommand() *cobra.Command {
@@ -46,6 +47,7 @@ func NewChainCommand() *cobra.Command {
 	cc.AddCommand(NewChainOnlineCommand())
 	cc.AddCommand(NewChainListCommand())
 	cc.AddCommand(NewChainDescribeCommand())
+	cc.AddCommand(NewChainDeleteCommand())
 
 	return cc
 }
@@ -194,4 +196,35 @@ func chainDescribeCommandFunc(cmd *cobra.Command, args []string) {
 	}
 
 	display.DescribeChain(resp)
+}
+
+func NewChainDeleteCommand() *cobra.Command {
+	cc := &cobra.Command{
+		Use:   "delete [options]",
+		Short: "Delete a chain in the k8s cluster",
+
+		Run: chainDeleteCommandFunc,
+	}
+
+	cc.Flags().StringVarP(&deleteChainRequest.Namespace, "namespace", "n", "cita", "The namespace that your chain in k8s.")
+
+	return cc
+}
+
+func chainDeleteCommandFunc(cmd *cobra.Command, args []string) {
+	// create grpc client
+	ctx, cancel := commandCtx(cmd)
+	defer func() {
+		cancel()
+	}()
+	cli := newClientFromCmd(cmd)
+
+	deleteChainRequest.Name = args[0]
+
+	_, err := cli.ChainInterface.Delete(ctx, &deleteChainRequest)
+	if err != nil {
+		ExitWithError(ExitError, err)
+	}
+
+	display.DeleteChain(&deleteChainRequest)
 }

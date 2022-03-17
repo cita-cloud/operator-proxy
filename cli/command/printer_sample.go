@@ -28,6 +28,10 @@ import (
 
 type simplePrinter struct{}
 
+func (s *simplePrinter) DeleteChain(request *chainpb.ChainDeleteRequest) {
+	fmt.Println(fmt.Sprintf("delete chain [%s/%s] success", request.GetNamespace(), request.GetName()))
+}
+
 func (s *simplePrinter) ListNode(list *node.NodeList) {
 	_, rows := makeNodeListTable(list.Nodes)
 	for _, row := range rows {

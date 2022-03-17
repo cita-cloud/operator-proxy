@@ -4,6 +4,7 @@ option go_package = "github.com/cita-cloud/operator-proxy/api/chain";
 
 import "api/node/node.proto";
 import "api/account/account.proto";
+import "google/protobuf/empty.proto";
 
 message Chain {
   string name = 1;
@@ -82,9 +83,15 @@ message ChainDescribeResponse {
   Status status = 18;
 }
 
+message ChainDeleteRequest {
+  string name = 1;
+  string namespace = 2;
+}
+
 service ChainService {
   rpc Init(Chain) returns (ChainSimpleResponse);
   rpc List(ListChainRequest) returns (ChainList);
   rpc Online(ChainOnlineRequest) returns (ChainSimpleResponse);
   rpc Describe(ChainDescribeRequest) returns (ChainDescribeResponse);
+  rpc Delete(ChainDeleteRequest) returns (google.protobuf.Empty);
 }

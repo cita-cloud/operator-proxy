@@ -19,6 +19,8 @@ package chain
 import (
 	"context"
 	"github.com/cita-cloud/operator-proxy/pkg/utils"
+	"github.com/golang/protobuf/ptypes/empty"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"time"
 
 	"google.golang.org/grpc/codes"
@@ -183,6 +185,18 @@ func (c chainServer) Describe(ctx context.Context, request *pb.ChainDescribeRequ
 		Nodes:           nodeList,
 		AdminAccount:    adminAccount,
 	}, status.New(codes.OK, "").Err()
+}
+
+func (c chainServer) Delete(ctx context.Context, request *pb.ChainDeleteRequest) (*emptypb.Empty, error) {
+	chain := &citacloudv1.ChainConfig{}
+	if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: request.Name, Namespace: request.Namespace}, chain); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get chain cr", err)
+	}
+	err := kubeapi.K8sClient.Delete(ctx, chain, client.GracePeriodSeconds(0))
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "delete chain error", err)
+	}
+	return &empty.Empty{}, status.New(codes.OK, "").Err()
 }
 
 func NewChainServer() pb.ChainServiceServer {

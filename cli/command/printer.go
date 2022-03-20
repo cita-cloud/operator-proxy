@@ -30,6 +30,7 @@ type printer interface {
 	OnlineChain(response *chainpb.ChainSimpleResponse)
 	ListChain(list *chainpb.ChainList)
 	DescribeChain(response *chainpb.ChainDescribeResponse)
+	DeleteChain(request *chainpb.ChainDeleteRequest)
 
 	// node
 	InitNode(response *nodepb.NodeSimpleResponse)

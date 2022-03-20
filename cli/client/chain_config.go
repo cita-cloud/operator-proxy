@@ -18,6 +18,7 @@ package client
 
 import (
 	"context"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	pb "github.com/cita-cloud/operator-proxy/api/chain"
 	"google.golang.org/grpc"
@@ -28,6 +29,7 @@ type ChainInterface interface {
 	Online(ctx context.Context, request *pb.ChainOnlineRequest) (*pb.ChainSimpleResponse, error)
 	List(ctx context.Context, request *pb.ListChainRequest) (*pb.ChainList, error)
 	Describe(ctx context.Context, request *pb.ChainDescribeRequest) (*pb.ChainDescribeResponse, error)
+	Delete(ctx context.Context, request *pb.ChainDeleteRequest) (*emptypb.Empty, error)
 }
 
 type chain struct {
@@ -67,6 +69,13 @@ func (c chain) Describe(ctx context.Context, request *pb.ChainDescribeRequest) (
 	return resp, nil
 }
 
+func (c chain) Delete(ctx context.Context, request *pb.ChainDeleteRequest) (*emptypb.Empty, error) {
+	resp, err := c.remote.Delete(ctx, request, c.callOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
 
 func NewChain(c *Client) ChainInterface {
 	api := &chain{remote: pb.NewChainServiceClient(c.conn)}

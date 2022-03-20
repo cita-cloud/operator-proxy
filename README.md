@@ -78,6 +78,7 @@ Usage:
   cco-cli chain [command]
 
 Available Commands:
+  delete      Delete a chain in the k8s cluster
   describe    Show chain detail in the k8s cluster
   init        Initialize a chain into the k8s cluster
   list        List chain in the k8s cluster
@@ -90,6 +91,50 @@ $ cco-cli chain init test-chain
 init chain [cita/test-chain] success
 ```
 - 此时，这条链的状态为`Publicizing`，代表该链的信息需要向各参与方公示，可以通过`describe`命令查看详情
+```shell
+$ cco-cli chain describe test-chain
+Chain Base Info:
++-----------------+--------------------------------------------------------------------+
+|      FIELD      |                               VALUE                                |
++-----------------+--------------------------------------------------------------------+
+| Name            | test-chain                                                         |
+| Namespace       | cita                                                               |
+| Id              | 63586a3c0255f337c77a777ff54f0040b8c388da04f23ecee6bfd4953a6512b4   |
+| Timestamp       | 1644466132459760                                                   |
+| PrevHash        | 0x0000000000000000000000000000000000000000000000000000000000000000 |
+| BlockInterval   | 3                                                                  |
+| BlockLimit      | 100                                                                |
+| EnableTls       | false                                                              |
+| ConsensusType   | Raft                                                               |
+| NetworkImage    | citacloud/network_p2p:v6.3.0                                       |
+| ConsensusImage  | citacloud/consensus_raft:v6.3.0                                    |
+| ExecutorImage   | citacloud/executor_evm:v6.3.0                                      |
+| StorageImage    | citacloud/storage_rocksdb:v6.3.0                                   |
+| ControllerImage | citacloud/controller:v6.3.0                                        |
+| KmsImage        | citacloud/kms_sm:v6.3.0                                            |
+| Status          | Publicizing                                                             |
++-----------------+--------------------------------------------------------------------+
+Admin Account:
++-------+-----------+------------+-------+--------+
+| NAME  | NAMESPACE |   CHAIN    | ROLE  | DOMAIN |
++-------+-----------+------------+-------+--------+
+| admin |   cita    | test-chain | Admin |        |
++-------+-----------+------------+-------+--------+
+Node Info:
++--------+-----------+------------+---------+------+---------+
+|  NAME  | NAMESPACE |   CHAIN    | ACCOUNT | SIZE | STATUS  |
++--------+-----------+------------+---------+------+---------+
+| node-1 |   cita    | test-chain |  alice  | 10Gi | Running |
+| node-2 |   cita    | test-chain |   bob   | 10Gi | Running |
+| node-3 |   cita    | test-chain | carlos  | 10Gi | Running |
++--------+-----------+------------+---------+------+---------+
+```
+- 经各方确认通过后，上线这条链，上线前需要创建好`Admin`账户和共识节点账户，参考[account command](#account command)
+```shell
+$ cco-cli chain online test-chain
+online chain [cita/test-chain] success
+```
+- 查看一条链的详情
 ```shell
 $ cco-cli chain describe test-chain
 Chain Base Info:
@@ -128,16 +173,6 @@ Node Info:
 | node-3 |   cita    | test-chain | carlos  | 10Gi | Running |
 +--------+-----------+------------+---------+------+---------+
 ```
-- 经各方确认通过后，上线这条链，上线前需要创建好`Admin`账户和共识节点账户，参考[account command](#account command)
-```shell
-$ cco-cli chain online test-chain
-online chain [cita/test-chain] success
-```
-- 查看一条链的详情
-```shell
-$ cco-cli chain describe test-chain
-
-```
 - 列出命名空间下的所有链
 ```shell
 $ cco-cli chain list -n cita
@@ -146,6 +181,11 @@ $ cco-cli chain list -n cita
 +------------+-----------+--------+
 | test-chain |   cita    | Online |
 +------------+-----------+--------+
+```
+- 删除一条链
+```shell
+$ cco-cli chain delete test-chain -n cita
+delete chain [cita/test-chain] success
 ```
 
 ### account command

@@ -25,6 +25,7 @@ message AllInOneCreateRequest {
   string storageClassName = 18;
   string logLevel = 19;
   string version = 20;
+  string adminAddress = 21;
 }
 
 message AllInOneCreateResponse {

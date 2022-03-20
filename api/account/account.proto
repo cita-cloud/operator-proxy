@@ -9,6 +9,7 @@ message Account {
   string kmsPassword = 4;
   Role role = 5;
   string domain = 6;
+  string address = 7;
 }
 
 enum Role {

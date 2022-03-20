@@ -47,57 +47,6 @@ func setDefault(request *pb.AllInOneCreateRequest) {
 	if request.GetId() == "" {
 		request.Id = utils.GenerateChainId(request.GetName())
 	}
-	if request.GetTimestamp() == 0 {
-		request.Timestamp = time.Now().UnixMicro()
-	}
-	if request.GetPrevHash() == "" {
-		request.PrevHash = "0x0000000000000000000000000000000000000000000000000000000000000000"
-	}
-	if request.GetBlockInterval() == 0 {
-		request.BlockInterval = 3
-	}
-	if request.GetBlockLimit() == 0 {
-		request.BlockLimit = 100
-	}
-	if request.GetNetworkImage() == "" {
-		if request.GetEnableTls() {
-			request.NetworkImage = "citacloud/network_tls:v6.3.0"
-		} else {
-			request.NetworkImage = "citacloud/network_p2p:v6.3.0"
-		}
-	}
-	if request.GetConsensusImage() == "" {
-		if request.ConsensusType == chainpb.ConsensusType_Raft {
-			request.ConsensusImage = "citacloud/consensus_raft:v6.3.0"
-		} else if request.ConsensusType == chainpb.ConsensusType_BFT {
-			request.ConsensusImage = "citacloud/consensus_bft:v6.3.0"
-		}
-	}
-	if request.GetExecutorImage() == "" {
-		request.ExecutorImage = "citacloud/executor_evm:v6.3.0"
-	}
-	if request.GetStorageImage() == "" {
-		request.StorageImage = "citacloud/storage_rocksdb:v6.3.0"
-	}
-	if request.GetControllerImage() == "" {
-		request.ControllerImage = "citacloud/controller:v6.3.0"
-	}
-	if request.GetKmsImage() == "" {
-		request.KmsImage = "citacloud/kms_sm:v6.3.0"
-	}
-	if request.GetStorageSize() == 0 {
-		// 10Gi
-		request.StorageSize = 10737418240
-	}
-	if request.GetStorageClassName() == "" {
-		request.StorageClassName = "nas-client-provisioner"
-	}
-	if request.GetLogLevel() == "" {
-		request.LogLevel = "info"
-	}
-	if request.GetNodeCount() == 0 {
-		request.NodeCount = 3
-	}
 }
 
 func (a allInOneServer) Create(ctx context.Context, request *pb.AllInOneCreateRequest) (*pb.AllInOneCreateResponse, error) {
@@ -125,7 +74,12 @@ func (a allInOneServer) Create(ctx context.Context, request *pb.AllInOneCreateRe
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to init chain: %v", err)
 	}
-	adminPwd, err := utils.GenerateAccountPassword()
+
+	var adminPwd string
+	if request.GetAdminAddress() == "" {
+		adminPwd, err = utils.GenerateAccountPassword()
+	}
+
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to generate admin password: %v", err)
 	}
@@ -135,6 +89,7 @@ func (a allInOneServer) Create(ctx context.Context, request *pb.AllInOneCreateRe
 		Chain:       request.GetName(),
 		KmsPassword: adminPwd,
 		Role:        accountpb.Role_Admin,
+		Address:     request.GetAdminAddress(),
 	}
 	_, err = accountsvc.NewAccountServer().CreateAccount(ctx, adminAccountReq)
 	if err != nil {

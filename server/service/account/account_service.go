@@ -45,6 +45,7 @@ func (a accountServer) CreateAccount(ctx context.Context, account *pb.Account) (
 	accountCr.Spec.KmsPassword = account.GetKmsPassword()
 	accountCr.Spec.Role = convertProtoToSpec(account.Role)
 	accountCr.Spec.Domain = account.Domain
+	accountCr.Spec.Address = account.Address
 
 	err := kubeapi.K8sClient.Create(ctx, accountCr)
 	if err != nil {

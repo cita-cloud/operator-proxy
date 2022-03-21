@@ -36,6 +36,7 @@ type printer interface {
 	InitNode(response *nodepb.NodeSimpleResponse)
 	ListNode(list *nodepb.NodeList)
 	StartNode(response *nodepb.NodeSimpleResponse)
+	StopNode(request *nodepb.NodeStopRequest)
 
 	// account
 	CreateAccount(account *accountpb.Account)

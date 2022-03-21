@@ -18,6 +18,8 @@ package node
 
 import (
 	"context"
+	"github.com/golang/protobuf/ptypes/empty"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -85,6 +87,20 @@ func (n nodeServer) Start(ctx context.Context, request *pb.NodeStartRequest) (*p
 		Namespace: request.Namespace,
 		Status:    pb.Status_Starting,
 	}, status.New(codes.OK, "").Err()
+}
+
+func (n nodeServer) Stop(ctx context.Context, request *pb.NodeStopRequest) (*emptypb.Empty, error) {
+	node := &citacloudv1.ChainNode{}
+	if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: request.Name, Namespace: request.Namespace}, node); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get node cr", err)
+	}
+	if node.Spec.Action != citacloudv1.NodeStop {
+		node.Spec.Action = citacloudv1.NodeStop
+		if err := kubeapi.K8sClient.Update(ctx, node); err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to update node stop", err)
+		}
+	}
+	return &empty.Empty{}, status.New(codes.OK, "").Err()
 }
 
 func NewNodeServer() pb.NodeServiceServer {

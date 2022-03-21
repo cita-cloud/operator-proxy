@@ -18,6 +18,7 @@ package client
 
 import (
 	"context"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	pb "github.com/cita-cloud/operator-proxy/api/node"
 	"google.golang.org/grpc"
@@ -27,6 +28,7 @@ type NodeInterface interface {
 	Init(ctx context.Context, node *pb.Node) (*pb.NodeSimpleResponse, error)
 	List(ctx context.Context, request *pb.ListNodeRequest) (*pb.NodeList, error)
 	Start(ctx context.Context, request *pb.NodeStartRequest) (*pb.NodeSimpleResponse, error)
+	Stop(ctx context.Context, request *pb.NodeStopRequest) (*emptypb.Empty, error)
 }
 
 type node struct {
@@ -52,6 +54,14 @@ func (n node) List(ctx context.Context, request *pb.ListNodeRequest) (*pb.NodeLi
 
 func (n node) Start(ctx context.Context, request *pb.NodeStartRequest) (*pb.NodeSimpleResponse, error) {
 	resp, err := n.remote.Start(ctx, request, n.callOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (n node) Stop(ctx context.Context, request *pb.NodeStopRequest) (*emptypb.Empty, error) {
+	resp, err := n.remote.Stop(ctx, request, n.callOpts...)
 	if err != nil {
 		return nil, err
 	}

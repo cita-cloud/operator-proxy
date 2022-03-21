@@ -47,6 +47,10 @@ func (s *simplePrinter) InitNode(response *node.NodeSimpleResponse) {
 	fmt.Println(fmt.Sprintf("init node [%s/%s] success", response.GetNamespace(), response.GetName()))
 }
 
+func (s *simplePrinter) StopNode(request *node.NodeStopRequest) {
+	fmt.Println(fmt.Sprintf("stop node [%s/%s] success", request.GetNamespace(), request.GetName()))
+}
+
 func (s *simplePrinter) CreateAllInOne(response *pb.AllInOneCreateResponse) {
 	fmt.Println(fmt.Sprintf("create chain [%s/%s] success by one click", response.GetNamespace(), response.GetName()))
 }

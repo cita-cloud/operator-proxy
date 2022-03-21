@@ -26,6 +26,7 @@ var (
 
 	listNodeRequest  = pb.ListNodeRequest{}
 	startNodeRequest = pb.NodeStartRequest{}
+	stopNodeRequest  = pb.NodeStopRequest{}
 )
 
 func NewNodeCommand() *cobra.Command {
@@ -37,6 +38,7 @@ func NewNodeCommand() *cobra.Command {
 	cc.AddCommand(NewNodeInitCommand())
 	cc.AddCommand(NewNodeListCommand())
 	cc.AddCommand(NewNodeStartCommand())
+	cc.AddCommand(NewNodeStopCommand())
 
 	return cc
 }
@@ -139,4 +141,35 @@ func nodeStartCommandFunc(cmd *cobra.Command, args []string) {
 	}
 
 	display.StartNode(resp)
+}
+
+func NewNodeStopCommand() *cobra.Command {
+	cc := &cobra.Command{
+		Use:   "stop <node name>",
+		Short: "Stop a node",
+
+		Run: nodeStopCommandFunc,
+	}
+
+	cc.Flags().StringVarP(&stopNodeRequest.Namespace, "namespace", "n", "cita", "The namespace that your node in k8s.")
+
+	return cc
+}
+
+func nodeStopCommandFunc(cmd *cobra.Command, args []string) {
+	// create grpc client
+	ctx, cancel := commandCtx(cmd)
+	defer func() {
+		cancel()
+	}()
+	cli := newClientFromCmd(cmd)
+
+	stopNodeRequest.Name = args[0]
+
+	_, err := cli.NodeInterface.Stop(ctx, &stopNodeRequest)
+	if err != nil {
+		ExitWithError(ExitError, err)
+	}
+
+	display.StopNode(&stopNodeRequest)
 }

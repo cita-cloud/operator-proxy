@@ -51,7 +51,7 @@ func NewAllInOneCreateCommand() *cobra.Command {
 	cc.Flags().StringVarP(&allInOneCreateRequest.Namespace, "namespace", "n", "cita", "The namespace that your chain create in k8s.")
 	cc.Flags().StringVarP(&allInOneCreateRequest.Id, "id", "i", "", "The chain id you create.")
 	cc.Flags().Int64VarP(&allInOneCreateRequest.Timestamp, "timestamp", "t", time.Now().UnixMicro(), "The chain timestamp you create.")
-	cc.Flags().StringVarP(&allInOneCreateRequest.PrevHash, "prevHash", "p", "", "The chain prevHash you create.")
+	cc.Flags().StringVarP(&allInOneCreateRequest.PrevHash, "prevHash", "p", "0x0000000000000000000000000000000000000000000000000000000000000000", "The chain prevHash you create.")
 	cc.Flags().Int32VarP(&allInOneCreateRequest.BlockInterval, "blockInterval", "", 3, "The chain blockInterval you create.")
 	cc.Flags().Int32VarP(&allInOneCreateRequest.BlockLimit, "blockLimit", "", 100, "The chain blockLimit you create.")
 	cc.Flags().BoolVarP(&allInOneCreateRequest.EnableTls, "enableTls", "", false, "enable tls")

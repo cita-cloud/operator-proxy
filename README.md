@@ -205,6 +205,7 @@ Available Commands:
 $ cco-cli account create admin --chain test-chain --kmsPassword 123456 --role Admin
 create account [cita/admin] success
 ```
+若创建时指定`address`字段，则不会生成新的`admin`账户地址，链的配置会将此地址作为`admin`账户的地址
 - 创建共识账户: `alice`
 ```shell
 $ cco-cli account create alice --chain test-chain --kmsPassword 123456 --role Consensus

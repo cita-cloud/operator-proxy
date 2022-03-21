@@ -49,11 +49,12 @@ func NewAccountCreateCommand() *cobra.Command {
 		Run: accountCreateCommandFunc,
 	}
 
-	cc.Flags().StringVarP(&createAccountRequest.Namespace, "namespace", "n", "cita", "The namespace that your node account create in k8s.")
-	cc.Flags().StringVarP(&createAccountRequest.Chain, "chain", "c", "", "The chain name corresponding to the node account.")
+	cc.Flags().StringVarP(&createAccountRequest.Namespace, "namespace", "n", "cita", "The namespace that your account create in k8s.")
+	cc.Flags().StringVarP(&createAccountRequest.Chain, "chain", "c", "", "The chain name corresponding to the account.")
 	cc.Flags().StringVarP(&createAccountRequest.KmsPassword, "kmsPassword", "k", "", "The account kms password.")
-	cc.Flags().StringVarP(&role, "role", "r", "", "The role of node account(Admin/Consensus/Ordinary).")
-	cc.Flags().StringVarP(&createAccountRequest.Domain, "domain", "d", "", "The domain of node account.")
+	cc.Flags().StringVarP(&role, "role", "r", "", "The role of account(Admin/Consensus/Ordinary).")
+	cc.Flags().StringVarP(&createAccountRequest.Domain, "domain", "d", "", "The domain of account.")
+	cc.Flags().StringVarP(&createAccountRequest.Address, "address", "a", "", "The address of account.")
 
 	return cc
 }

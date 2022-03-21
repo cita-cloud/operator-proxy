@@ -64,7 +64,7 @@ func NewAllInOneCreateCommand() *cobra.Command {
 	cc.Flags().StringVarP(&allInOneCreateRequest.ControllerImage, "controllerImage", "", "", "The chain's controller image.")
 	cc.Flags().StringVarP(&allInOneCreateRequest.KmsImage, "kmsImage", "", "", "The chain's kms image.")
 
-	cc.Flags().StringVarP(&allInOneCreateRequest.StorageClassName, "storageClassName", "", "", "The node's storage class.")
+	cc.Flags().StringVarP(&allInOneCreateRequest.StorageClassName, "storageClassName", "", "nas-client-provisioner", "The node's storage class.")
 	cc.Flags().Int64VarP(&allInOneCreateRequest.StorageSize, "storageSize", "", 10737418240, "The chain's storage size.")
 	cc.Flags().StringVarP(&allInOneCreateRequest.LogLevel, "logLevel", "", "info", "The node's log level.")
 

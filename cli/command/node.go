@@ -24,9 +24,10 @@ import (
 var (
 	initNodeRequest = pb.Node{}
 
-	listNodeRequest  = pb.ListNodeRequest{}
-	startNodeRequest = pb.NodeStartRequest{}
-	stopNodeRequest  = pb.NodeStopRequest{}
+	listNodeRequest     = pb.ListNodeRequest{}
+	startNodeRequest    = pb.NodeStartRequest{}
+	stopNodeRequest     = pb.NodeStopRequest{}
+	reloadConfigRequest = pb.ReloadConfigRequest{}
 )
 
 func NewNodeCommand() *cobra.Command {
@@ -39,6 +40,7 @@ func NewNodeCommand() *cobra.Command {
 	cc.AddCommand(NewNodeListCommand())
 	cc.AddCommand(NewNodeStartCommand())
 	cc.AddCommand(NewNodeStopCommand())
+	cc.AddCommand(NewNodeReloadConfigCommand())
 
 	return cc
 }
@@ -172,4 +174,35 @@ func nodeStopCommandFunc(cmd *cobra.Command, args []string) {
 	}
 
 	display.StopNode(&stopNodeRequest)
+}
+
+func NewNodeReloadConfigCommand() *cobra.Command {
+	cc := &cobra.Command{
+		Use:   "reload <node name>",
+		Short: "Reload the node's config, usually used to add or delete nodes in a chain",
+
+		Run: nodeReloadConfigCommand,
+	}
+
+	cc.Flags().StringVarP(&reloadConfigRequest.Namespace, "namespace", "n", "cita", "The namespace that your node in k8s.")
+
+	return cc
+}
+
+func nodeReloadConfigCommand(cmd *cobra.Command, args []string) {
+	// create grpc client
+	ctx, cancel := commandCtx(cmd)
+	defer func() {
+		cancel()
+	}()
+	cli := newClientFromCmd(cmd)
+
+	reloadConfigRequest.Name = args[0]
+
+	_, err := cli.NodeInterface.ReloadConfig(ctx, &reloadConfigRequest)
+	if err != nil {
+		ExitWithError(ExitError, err)
+	}
+
+	display.ReloadConfig(&reloadConfigRequest)
 }

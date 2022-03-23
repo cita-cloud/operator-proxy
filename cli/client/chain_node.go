@@ -29,6 +29,7 @@ type NodeInterface interface {
 	List(ctx context.Context, request *pb.ListNodeRequest) (*pb.NodeList, error)
 	Start(ctx context.Context, request *pb.NodeStartRequest) (*pb.NodeSimpleResponse, error)
 	Stop(ctx context.Context, request *pb.NodeStopRequest) (*emptypb.Empty, error)
+	ReloadConfig(ctx context.Context, request *pb.ReloadConfigRequest) (*emptypb.Empty, error)
 }
 
 type node struct {
@@ -62,6 +63,14 @@ func (n node) Start(ctx context.Context, request *pb.NodeStartRequest) (*pb.Node
 
 func (n node) Stop(ctx context.Context, request *pb.NodeStopRequest) (*emptypb.Empty, error) {
 	resp, err := n.remote.Stop(ctx, request, n.callOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (n node) ReloadConfig(ctx context.Context, request *pb.ReloadConfigRequest) (*emptypb.Empty, error) {
+	resp, err := n.remote.ReloadConfig(ctx, request, n.callOpts...)
 	if err != nil {
 		return nil, err
 	}

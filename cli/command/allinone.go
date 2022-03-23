@@ -70,7 +70,7 @@ func NewAllInOneCreateCommand() *cobra.Command {
 
 	cc.Flags().Int32VarP(&allInOneCreateRequest.NodeCount, "nodeCount", "", 3, "The node count for chain start.")
 	cc.Flags().StringVarP(&allInOneCreateRequest.Version, "version", "v", citacloudv1.LATEST_VERSION, "The chain's main version.")
-
+	cc.Flags().StringVarP(&allInOneCreateRequest.AdminAddress, "adminAddress", "a", "", "The chain's admin address.")
 	return cc
 }
 

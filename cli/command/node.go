@@ -28,6 +28,7 @@ var (
 	startNodeRequest    = pb.NodeStartRequest{}
 	stopNodeRequest     = pb.NodeStopRequest{}
 	reloadConfigRequest = pb.ReloadConfigRequest{}
+	deleteNodeRequest   = pb.NodeDeleteRequest{}
 )
 
 func NewNodeCommand() *cobra.Command {
@@ -41,6 +42,7 @@ func NewNodeCommand() *cobra.Command {
 	cc.AddCommand(NewNodeStartCommand())
 	cc.AddCommand(NewNodeStopCommand())
 	cc.AddCommand(NewNodeReloadConfigCommand())
+	cc.AddCommand(NewNodeDeleteCommand())
 
 	return cc
 }
@@ -181,7 +183,7 @@ func NewNodeReloadConfigCommand() *cobra.Command {
 		Use:   "reload <node name>",
 		Short: "Reload the node's config, usually used to add or delete nodes in a chain",
 
-		Run: nodeReloadConfigCommand,
+		Run: nodeReloadConfigCommandFunc,
 	}
 
 	cc.Flags().StringVarP(&reloadConfigRequest.Namespace, "namespace", "n", "cita", "The namespace that your node in k8s.")
@@ -189,7 +191,7 @@ func NewNodeReloadConfigCommand() *cobra.Command {
 	return cc
 }
 
-func nodeReloadConfigCommand(cmd *cobra.Command, args []string) {
+func nodeReloadConfigCommandFunc(cmd *cobra.Command, args []string) {
 	// create grpc client
 	ctx, cancel := commandCtx(cmd)
 	defer func() {
@@ -205,4 +207,35 @@ func nodeReloadConfigCommand(cmd *cobra.Command, args []string) {
 	}
 
 	display.ReloadConfig(&reloadConfigRequest)
+}
+
+func NewNodeDeleteCommand() *cobra.Command {
+	cc := &cobra.Command{
+		Use:   "delete <node name>",
+		Short: "Delete a node",
+
+		Run: nodeDeleteCommandFunc,
+	}
+
+	cc.Flags().StringVarP(&deleteNodeRequest.Namespace, "namespace", "n", "cita", "The namespace that your node in k8s.")
+
+	return cc
+}
+
+func nodeDeleteCommandFunc(cmd *cobra.Command, args []string) {
+	// create grpc client
+	ctx, cancel := commandCtx(cmd)
+	defer func() {
+		cancel()
+	}()
+	cli := newClientFromCmd(cmd)
+
+	deleteNodeRequest.Name = args[0]
+
+	_, err := cli.NodeInterface.Delete(ctx, &deleteNodeRequest)
+	if err != nil {
+		ExitWithError(ExitError, err)
+	}
+
+	display.DeleteNode(&deleteNodeRequest)
 }

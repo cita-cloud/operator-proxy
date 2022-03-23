@@ -55,6 +55,10 @@ func (s *simplePrinter) ReloadConfig(request *node.ReloadConfigRequest) {
 	fmt.Println(fmt.Sprintf("reload node config [%s/%s] success", request.GetNamespace(), request.GetName()))
 }
 
+func (s *simplePrinter) DeleteNode(request *node.NodeDeleteRequest) {
+	fmt.Println(fmt.Sprintf("delete node [%s/%s] success", request.GetNamespace(), request.GetName()))
+}
+
 func (s *simplePrinter) CreateAllInOne(response *pb.AllInOneCreateResponse) {
 	fmt.Println(fmt.Sprintf("create chain [%s/%s] success by one click", response.GetNamespace(), response.GetName()))
 }

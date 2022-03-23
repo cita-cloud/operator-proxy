@@ -20,6 +20,7 @@ import (
 	"context"
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -156,6 +157,18 @@ func (n nodeServer) ReloadConfig(ctx context.Context, request *pb.ReloadConfigRe
 		return nil, status.Errorf(codes.Internal, "failed to update configmap", err)
 	}
 
+	return &empty.Empty{}, status.New(codes.OK, "").Err()
+}
+
+func (n nodeServer) Delete(ctx context.Context, request *pb.NodeDeleteRequest) (*emptypb.Empty, error) {
+	node := &citacloudv1.ChainNode{}
+	if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: request.Name, Namespace: request.Namespace}, node); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get node cr", err)
+	}
+	err := kubeapi.K8sClient.Delete(ctx, node, client.GracePeriodSeconds(0))
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "delete node error", err)
+	}
 	return &empty.Empty{}, status.New(codes.OK, "").Err()
 }
 

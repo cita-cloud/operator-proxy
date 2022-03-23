@@ -23,10 +23,12 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/pointer"
 
 	citacloudv1 "github.com/cita-cloud/cita-cloud-operator/api/v1"
+	operatorctrl "github.com/cita-cloud/cita-cloud-operator/controllers"
 
 	pb "github.com/cita-cloud/operator-proxy/api/node"
 	"github.com/cita-cloud/operator-proxy/server/kubeapi"
@@ -100,6 +102,60 @@ func (n nodeServer) Stop(ctx context.Context, request *pb.NodeStopRequest) (*emp
 			return nil, status.Errorf(codes.Internal, "failed to update node stop", err)
 		}
 	}
+	return &empty.Empty{}, status.New(codes.OK, "").Err()
+}
+
+func (n nodeServer) ReloadConfig(ctx context.Context, request *pb.ReloadConfigRequest) (*emptypb.Empty, error) {
+	node := &citacloudv1.ChainNode{}
+	if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: request.Name, Namespace: request.Namespace}, node); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get node cr", err)
+	}
+	// find chain config
+	chain := &citacloudv1.ChainConfig{}
+	if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: node.Spec.ChainName, Namespace: request.Namespace}, chain); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get chain cr", err)
+	}
+
+	// find account
+	account := &citacloudv1.Account{}
+	if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: node.Spec.Account, Namespace: request.Namespace}, account); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get account cr", err)
+	}
+
+	// find node's configmap
+	configmap := &corev1.ConfigMap{}
+	if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: operatorctrl.GetNodeConfigName(request.Name), Namespace: request.Namespace}, configmap); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get configmap cr", err)
+	}
+
+	var cnService *operatorctrl.ChainNodeService
+
+	if chain.Spec.EnableTLS {
+		// todo: reflect
+		// get chain ca secret
+		caSecret := &corev1.Secret{}
+		if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: operatorctrl.GetCaSecretName(chain.Name), Namespace: chain.Namespace}, caSecret); err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to get ca secret", err)
+		}
+		// get node secret
+		nodeCertAndKeySecret := &corev1.Secret{}
+		if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: operatorctrl.GetAccountCertAndKeySecretName(node.Spec.Account), Namespace: node.Namespace}, nodeCertAndKeySecret); err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to get node secret", err)
+		}
+
+		cnService = operatorctrl.NewChainNodeServiceForTls(chain, node, account, caSecret, nodeCertAndKeySecret)
+	} else {
+		cnService = operatorctrl.NewChainNodeServiceForP2P(chain, node, account)
+	}
+
+	configmap.Data = map[string]string{
+		operatorctrl.NodeConfigFile: cnService.GenerateNodeConfig(),
+	}
+
+	if err := kubeapi.K8sClient.Update(ctx, configmap); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to update configmap", err)
+	}
+
 	return &empty.Empty{}, status.New(codes.OK, "").Err()
 }
 

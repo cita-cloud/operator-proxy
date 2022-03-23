@@ -56,9 +56,15 @@ message NodeStopRequest {
   string namespace = 2;
 }
 
+message ReloadConfigRequest {
+  string name = 1;
+  string namespace = 2;
+}
+
 service NodeService {
   rpc Init(Node) returns (NodeSimpleResponse);
   rpc List(ListNodeRequest) returns (NodeList);
   rpc Start(NodeStartRequest) returns (NodeSimpleResponse);
   rpc Stop(NodeStopRequest) returns (google.protobuf.Empty);
+  rpc ReloadConfig(ReloadConfigRequest) returns (google.protobuf.Empty);
 }

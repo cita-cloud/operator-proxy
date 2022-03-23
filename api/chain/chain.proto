@@ -23,6 +23,7 @@ message Chain {
   string controllerImage = 14;
   string kmsImage = 15;
   string version = 16;
+  string pullPolicy = 17;
 }
 
 enum ConsensusType {

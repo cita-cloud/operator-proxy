@@ -26,6 +26,7 @@ message AllInOneCreateRequest {
   string logLevel = 19;
   string version = 20;
   string adminAddress = 21;
+  string pullPolicy = 22;
 }
 
 message AllInOneCreateResponse {

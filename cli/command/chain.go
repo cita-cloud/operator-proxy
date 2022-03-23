@@ -19,6 +19,7 @@ package command
 import (
 	"errors"
 	citacloudv1 "github.com/cita-cloud/cita-cloud-operator/api/v1"
+	corev1 "k8s.io/api/core/v1"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -75,6 +76,7 @@ func NewChainInitCommand() *cobra.Command {
 	cc.Flags().StringVarP(&initChainRequest.ControllerImage, "controllerImage", "", "", "The chain's controller image.")
 	cc.Flags().StringVarP(&initChainRequest.KmsImage, "kmsImage", "", "", "The chain's kms image.")
 	cc.Flags().StringVarP(&initChainRequest.Version, "version", "v", citacloudv1.LATEST_VERSION, "The chain's main version.")
+	cc.Flags().StringVarP(&initChainRequest.PullPolicy, "pullPolicy", "", string(corev1.PullIfNotPresent), "The pull image policy (IfNotPresent/Always).")
 
 	return cc
 }

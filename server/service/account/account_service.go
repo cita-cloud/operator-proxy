@@ -18,6 +18,7 @@ package account
 
 import (
 	"context"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	citacloudv1 "github.com/cita-cloud/cita-cloud-operator/api/v1"
 	"google.golang.org/grpc/codes"
@@ -30,6 +31,8 @@ import (
 
 var _ pb.AccountServiceServer = &accountServer{}
 
+var log = ctrl.Log.WithName("account")
+
 type accountServer struct {
 }
 
@@ -38,6 +41,7 @@ func NewAccountServer() pb.AccountServiceServer {
 }
 
 func (a accountServer) CreateAccount(ctx context.Context, account *pb.Account) (*pb.Account, error) {
+	log.Info("create", "request", account)
 	accountCr := &citacloudv1.Account{}
 	accountCr.Name = account.GetName()
 	accountCr.Namespace = account.GetNamespace()
@@ -58,6 +62,7 @@ func (a accountServer) CreateAccount(ctx context.Context, account *pb.Account) (
 }
 
 func (a accountServer) ListAccount(ctx context.Context, request *pb.ListAccountRequest) (*pb.AccountList, error) {
+	log.Info("list", "request", request)
 	accountCrList := &citacloudv1.AccountList{}
 	accountCrOpts := []client.ListOption{
 		client.InNamespace(request.GetNamespace()),

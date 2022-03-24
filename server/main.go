@@ -19,6 +19,8 @@ package main
 import (
 	"log"
 	"net"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -39,6 +41,7 @@ const (
 )
 
 func main() {
+	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
 	err := k8sclient.InitK8sClient()
 	if err != nil {
 		log.Fatalf("failed to init k8s client: %v", err)

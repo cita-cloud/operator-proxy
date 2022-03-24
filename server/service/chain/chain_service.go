@@ -21,6 +21,7 @@ import (
 	"github.com/cita-cloud/operator-proxy/pkg/utils"
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/protobuf/types/known/emptypb"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"time"
 
 	"google.golang.org/grpc/codes"
@@ -37,6 +38,7 @@ import (
 )
 
 var _ pb.ChainServiceServer = &chainServer{}
+var log = ctrl.Log.WithName("chain")
 
 type chainServer struct {
 }
@@ -94,6 +96,7 @@ func (c chainServer) setDefault(request *pb.Chain) (*citacloudv1.ChainConfig, er
 }
 
 func (c chainServer) Init(ctx context.Context, request *pb.Chain) (*pb.ChainSimpleResponse, error) {
+	log.Info("init", "request", request)
 	chainConfig, err := c.setDefault(request)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to set default chain cr", err)
@@ -111,6 +114,7 @@ func (c chainServer) Init(ctx context.Context, request *pb.Chain) (*pb.ChainSimp
 }
 
 func (c chainServer) List(ctx context.Context, request *pb.ListChainRequest) (*pb.ChainList, error) {
+	log.Info("list", "request", request)
 	chainCrList := &citacloudv1.ChainConfigList{}
 	chainCrOpts := []client.ListOption{
 		client.InNamespace(request.GetNamespace()),
@@ -131,6 +135,7 @@ func (c chainServer) List(ctx context.Context, request *pb.ListChainRequest) (*p
 }
 
 func (c chainServer) Online(ctx context.Context, request *pb.ChainOnlineRequest) (*pb.ChainSimpleResponse, error) {
+	log.Info("online", "request", request)
 	chain := &citacloudv1.ChainConfig{}
 	if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: request.Name, Namespace: request.Namespace}, chain); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get chain cr", err)
@@ -150,6 +155,7 @@ func (c chainServer) Online(ctx context.Context, request *pb.ChainOnlineRequest)
 }
 
 func (c chainServer) Describe(ctx context.Context, request *pb.ChainDescribeRequest) (*pb.ChainDescribeResponse, error) {
+	log.Info("describe", "request", request)
 	chain := &citacloudv1.ChainConfig{}
 	if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: request.Name, Namespace: request.Namespace}, chain); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get chain cr", err)
@@ -188,6 +194,7 @@ func (c chainServer) Describe(ctx context.Context, request *pb.ChainDescribeRequ
 }
 
 func (c chainServer) Delete(ctx context.Context, request *pb.ChainDeleteRequest) (*emptypb.Empty, error) {
+	log.Info("delete", "request", request)
 	chain := &citacloudv1.ChainConfig{}
 	if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: request.Name, Namespace: request.Namespace}, chain); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get chain cr", err)

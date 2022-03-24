@@ -19,6 +19,7 @@ package allinone
 import (
 	"context"
 	"fmt"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"time"
 
 	"google.golang.org/grpc/codes"
@@ -39,6 +40,7 @@ import (
 )
 
 var _ pb.AllInOneServiceServer = &allInOneServer{}
+var log = ctrl.Log.WithName("all-in-one")
 
 type allInOneServer struct {
 }
@@ -51,6 +53,7 @@ func setDefault(request *pb.AllInOneCreateRequest) {
 
 func (a allInOneServer) Create(ctx context.Context, request *pb.AllInOneCreateRequest) (*pb.AllInOneCreateResponse, error) {
 	setDefault(request)
+	log.Info("create", "request", request)
 	// init chain
 	initChainReq := &chainpb.Chain{
 		Name:            request.GetName(),

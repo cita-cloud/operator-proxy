@@ -20,6 +20,7 @@ import (
 	"context"
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/protobuf/types/known/emptypb"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"google.golang.org/grpc/codes"
@@ -37,11 +38,13 @@ import (
 )
 
 var _ pb.NodeServiceServer = &nodeServer{}
+var log = ctrl.Log.WithName("node")
 
 type nodeServer struct {
 }
 
 func (n nodeServer) Init(ctx context.Context, node *pb.Node) (*pb.NodeSimpleResponse, error) {
+	log.Info("init", "request", node)
 	nodeCr := &citacloudv1.ChainNode{}
 	nodeCr.Name = node.GetName()
 	nodeCr.Namespace = node.GetNamespace()
@@ -67,6 +70,7 @@ func (n nodeServer) Init(ctx context.Context, node *pb.Node) (*pb.NodeSimpleResp
 }
 
 func (n nodeServer) List(ctx context.Context, request *pb.ListNodeRequest) (*pb.NodeList, error) {
+	log.Info("list", "request", request)
 	nodeList, err := resource.GetNodeList(ctx, request.GetNamespace(), request.GetChain())
 	if err != nil {
 		return nil, err
@@ -75,6 +79,7 @@ func (n nodeServer) List(ctx context.Context, request *pb.ListNodeRequest) (*pb.
 }
 
 func (n nodeServer) Start(ctx context.Context, request *pb.NodeStartRequest) (*pb.NodeSimpleResponse, error) {
+	log.Info("start", "request", request)
 	node := &citacloudv1.ChainNode{}
 	if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: request.Name, Namespace: request.Namespace}, node); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get node cr", err)
@@ -93,6 +98,7 @@ func (n nodeServer) Start(ctx context.Context, request *pb.NodeStartRequest) (*p
 }
 
 func (n nodeServer) Stop(ctx context.Context, request *pb.NodeStopRequest) (*emptypb.Empty, error) {
+	log.Info("stop", "request", request)
 	node := &citacloudv1.ChainNode{}
 	if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: request.Name, Namespace: request.Namespace}, node); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get node cr", err)
@@ -107,6 +113,7 @@ func (n nodeServer) Stop(ctx context.Context, request *pb.NodeStopRequest) (*emp
 }
 
 func (n nodeServer) ReloadConfig(ctx context.Context, request *pb.ReloadConfigRequest) (*emptypb.Empty, error) {
+	log.Info("reload config", "request", request)
 	node := &citacloudv1.ChainNode{}
 	if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: request.Name, Namespace: request.Namespace}, node); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get node cr", err)
@@ -161,6 +168,7 @@ func (n nodeServer) ReloadConfig(ctx context.Context, request *pb.ReloadConfigRe
 }
 
 func (n nodeServer) Delete(ctx context.Context, request *pb.NodeDeleteRequest) (*emptypb.Empty, error) {
+	log.Info("delete", "request", request)
 	node := &citacloudv1.ChainNode{}
 	if err := kubeapi.K8sClient.Get(ctx, types.NamespacedName{Name: request.Name, Namespace: request.Namespace}, node); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get node cr", err)

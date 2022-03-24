@@ -30,8 +30,12 @@ kubectl get pod -ncita | grep cita-cloud-operator-proxy
 如果实际输出的`STATUS`状态是`Running`, 表示`operator-proxy`已经成功安装。
 
 ### `cco-cli`的安装
-- 下载地址
-可根据运行平台下载对应的二进制程序：<https://github.com/cita-cloud/operator-proxy/releases>
+- 最新版本安装
+```shell
+curl -sLS https://raw.githubusercontent.com/cita-cloud/operator-proxy/master/install-cli.sh | bash
+```
+- 手动安装指定版本
+可根据运行平台下载对应版本的二进制至可执行目录下：<https://github.com/cita-cloud/operator-proxy/releases>
 
 - 设置环境变量(以`Linux`为例)
 获得`operator-proxy`暴露的`NodePort`端口(示例中为30194)

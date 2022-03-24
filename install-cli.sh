@@ -20,7 +20,8 @@ export OWNER=cita-cloud
 export REPO=operator-proxy
 export BIN_LOCATION="/usr/local/bin"
 
-cli_version=$(curl -s https://api.github.com/repos/$OWNER/$REPO/releases/latest | grep 'tag_name' | cut -d '"' -f 4 | tr -d 'v')
+#cli_version=$(curl -s https://api.github.com/repos/$OWNER/$REPO/releases/latest | grep 'tag_name' | cut -d '"' -f 4 | tr -d 'v')
+cli_version=0.0.1
 
 function sudocmd(){
     if [ $(whoami) == "root" ]; then
@@ -81,9 +82,10 @@ getPackage() {
     fi
 
     url=https://github.com/$OWNER/$REPO/releases/download/v$cli_version/cco-cli-$cli_version-$suffix
+
     echo "Downloading package $url as $targetFile"
 
-    curl -sSL $url --output "$targetFile"
+    curl -sSL --fail $url --output "$targetFile"
 
     if [ "$?" = "0" ]; then
       echo "Download complete."
@@ -101,6 +103,8 @@ getPackage() {
       echo "  kubectl get svc cita-cloud-operator-proxy -n{YOUR_NAMESPACE}"
       echo "=============================================================="
       echo
+    else
+      echo "Download file failed, maybe not found."
     fi
 }
 

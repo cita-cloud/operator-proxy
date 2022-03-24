@@ -206,28 +206,28 @@ $ cco-cli account create admin --chain test-chain --kmsPassword 123456 --role Ad
 create account [cita/admin] success
 ```
 若创建时指定`address`字段，则不会生成新的`admin`账户地址，链的配置会将此地址作为`admin`账户的地址
-- 创建共识账户: `alice`
+- 创建共识账户: `alice`，若链的网络选择`tls`，则必须加上`domain`参数
 ```shell
-$ cco-cli account create alice --chain test-chain --kmsPassword 123456 --role Consensus
+$ cco-cli account create alice --chain test-chain --kmsPassword 123456 --role Consensus --domain alice.cita.com
 create account [cita/alice] success
 ```
-- 创建普通账户: `davis`
+- 创建普通账户: `davis`，若链的网络选择`tls`，则必须加上`domain`参数
 ```shell
-$ cco-cli account create davis --chain test-chain --kmsPassword 123456 --role Ordinary
+$ cco-cli account create davis --chain test-chain --kmsPassword 123456 --role Ordinary --domain davis.cita.com
 create account [cita/davis] success
 ```
 - 查看命名空间下所有用户
 ```shell
 $ cco-cli account list -n cita
-+--------+-----------+------------+-----------+--------+
-|  NAME  | NAMESPACE |   CHAIN    |   ROLE    | DOMAIN |
-+--------+-----------+------------+-----------+--------+
-| admin  |   cita    | test-chain |   Admin   |        |
-| alice  |   cita    | test-chain | Consensus |        |
-|  bob   |   cita    | test-chain | Consensus |        |
-| carlos |   cita    | test-chain | Consensus |        |
-| davis  |   cita    | test-chain | Ordinary  |        |
-+--------+-----------+------------+-----------+--------+
++--------+-----------+------------+-----------+-----------------+
+|  NAME  | NAMESPACE |   CHAIN    |   ROLE    |   DOMAIN        |
++--------+-----------+------------+-----------+-----------------+
+| admin  |   cita    | test-chain |   Admin   |                 |
+| alice  |   cita    | test-chain | Consensus | alice.cita.com  |
+|  bob   |   cita    | test-chain | Consensus |  bob.cita.com   |
+| carlos |   cita    | test-chain | Consensus | carlos.cita.com |
+| davis  |   cita    | test-chain | Ordinary  | davis.cita.com  |
++--------+-----------+------------+-----------+-----------------+
 ```
 
 ### node command
@@ -239,14 +239,17 @@ Usage:
   cco-cli node [command]
 
 Available Commands:
+  delete      Delete a node
   init        Init a node for chain
   list        List node in the k8s cluster
+  reload      Reload the node config, usually used to add or delete nodes in a chain
   start       Start a node
+  stop        Stop a node
 ```
-- 初始化链下的一个节点：node1，需匹配对应的链名和账户，cluster参数为当前Kubernetes的集群名
+- 初始化链下的一个节点：`node1`，需匹配对应的链名和账户
 可初始化与共识账户对应的节点数量
 ```shell
-$ cco-cli node init node-1 --account alice --chain test-chain --cluster k8s-1 --storageClassName nas-client-provisioner --storageSize 10737418240
+$ cco-cli node init node-1 --account alice --chain test-chain --storageClassName nas-client-provisioner --storageSize 10737418240
 init node [cita/node-1] success
 ```
 - 启动对应的各个节点
@@ -254,6 +257,7 @@ init node [cita/node-1] success
 $ cco-cli node start node-1
 start node [cita/node-1] success
 ```
+其他共识节点同上
 - 列出对应链下的所有节点
 ```shell
 $ cco-cli node list --chain test-chain
@@ -264,4 +268,22 @@ $ cco-cli node list --chain test-chain
 | node-3 |   cita    | test-chain | carlos  | 10Gi | Running |
 | node-1 |   cita    | test-chain |  alice  | 10Gi | Running |
 +--------+-----------+------------+---------+------+---------+
+```
+- 新增普通节点`node-4`，对应账户为`davis`
+```shell
+# 初始化
+cco-cli node init node-4 --account davis --chain test-chain
+# 启动
+cco-cli node start node-4
+```
+新增节点后，原有节点均需要执行`reload`操作，以便能与新节点进行网络交互
+```shell
+$ cco-cli node reload node-1
+reload node [cita/node-1] success
+$ cco-cli node reload node-2
+reload node [cita/node-2] success
+$ cco-cli node reload node-3
+reload node [cita/node-3] success
+$ cco-cli node reload node-4
+reload node [cita/node-4] success
 ```

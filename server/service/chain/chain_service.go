@@ -21,6 +21,7 @@ import (
 	"github.com/cita-cloud/operator-proxy/pkg/utils"
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/protobuf/types/known/emptypb"
+	corev1 "k8s.io/api/core/v1"
 	"time"
 
 	"google.golang.org/grpc/codes"
@@ -90,6 +91,7 @@ func (c chainServer) setDefault(request *pb.Chain) (*citacloudv1.ChainConfig, er
 	// merge
 	chainConfig.MergeFromDefaultImageInfo(defaultImageInfo)
 
+	chainConfig.Spec.PullPolicy = corev1.PullPolicy(request.PullPolicy)
 	return chainConfig, nil
 }
 

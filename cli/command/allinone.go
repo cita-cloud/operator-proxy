@@ -19,6 +19,8 @@ package command
 import (
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
+
 	citacloudv1 "github.com/cita-cloud/cita-cloud-operator/api/v1"
 	pb "github.com/cita-cloud/operator-proxy/api/allinone"
 	chainpb "github.com/cita-cloud/operator-proxy/api/chain"
@@ -71,6 +73,7 @@ func NewAllInOneCreateCommand() *cobra.Command {
 	cc.Flags().Int32VarP(&allInOneCreateRequest.NodeCount, "nodeCount", "", 3, "The node count for chain start.")
 	cc.Flags().StringVarP(&allInOneCreateRequest.Version, "version", "v", citacloudv1.LATEST_VERSION, "The chain's main version.")
 	cc.Flags().StringVarP(&allInOneCreateRequest.AdminAddress, "adminAddress", "a", "", "The chain's admin address.")
+	cc.Flags().StringVarP(&allInOneCreateRequest.PullPolicy, "pullPolicy", "", string(corev1.PullIfNotPresent), "The pull image policy (IfNotPresent/Always).")
 	return cc
 }
 

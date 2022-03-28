@@ -3,7 +3,7 @@ module github.com/cita-cloud/operator-proxy
 go 1.17
 
 require (
-	github.com/cita-cloud/cita-cloud-operator v0.0.0-20220323023630-238c1ac029d4
+	github.com/cita-cloud/cita-cloud-operator v0.0.1
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.1.2
 	github.com/olekukonko/tablewriter v0.0.5

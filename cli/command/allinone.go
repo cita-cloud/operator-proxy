@@ -74,6 +74,16 @@ func NewAllInOneCreateCommand() *cobra.Command {
 	cc.Flags().StringVarP(&allInOneCreateRequest.Version, "version", "v", citacloudv1.LATEST_VERSION, "The chain's main version.")
 	cc.Flags().StringVarP(&allInOneCreateRequest.AdminAddress, "adminAddress", "a", "", "The chain's admin address.")
 	cc.Flags().StringVarP(&allInOneCreateRequest.PullPolicy, "pullPolicy", "", string(corev1.PullIfNotPresent), "The pull image policy (IfNotPresent/Always).")
+
+	cc.Flags().StringVar(&allInOneCreateRequest.CpuRequest, "cpuRequest", "", "Set the number of milli cores to request for the CPU, e.g. "+
+		"\"100m\" or \"0.1\".")
+	cc.Flags().StringVar(&allInOneCreateRequest.CpuLimit, "cpuLimit", "", "Set the number of milli cores to limit for the CPU, e.g. "+
+		"\"100m\" or \"0.1\".")
+	cc.Flags().StringVar(&allInOneCreateRequest.MemRequest, "memRequest", "", "Set the amount of RAM to request, e.g. "+
+		"\"1GiB\". ")
+	cc.Flags().StringVar(&allInOneCreateRequest.MemLimit, "memLimit", "", "Set the amount of RAM to limit, e.g. "+
+		"\"1GiB\". ")
+
 	return cc
 }
 

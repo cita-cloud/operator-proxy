@@ -27,6 +27,10 @@ message AllInOneCreateRequest {
   string version = 20;
   string adminAddress = 21;
   string pullPolicy = 22;
+  string cpuRequest = 23;
+  string cpuLimit = 24;
+  string memRequest = 25;
+  string memLimit = 26;
 }
 
 message AllInOneCreateResponse {

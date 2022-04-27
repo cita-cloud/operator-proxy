@@ -16,6 +16,10 @@ message Node {
   string storageClassName = 14;
   string logLevel = 15;
   Status status = 16;
+  string cpuRequest = 17;
+  string cpuLimit = 18;
+  string memRequest = 19;
+  string memLimit = 20;
 }
 
 enum Status {

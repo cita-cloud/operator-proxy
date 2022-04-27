@@ -64,6 +64,14 @@ func NewNodeInitCommand() *cobra.Command {
 	cc.Flags().StringVarP(&initNodeRequest.StorageClassName, "storageClassName", "", "nas-client-provisioner", "The node's storage class name.")
 	cc.Flags().Int64VarP(&initNodeRequest.StorageSize, "storageSize", "", 10737418240, "The node's storage size.")
 	cc.Flags().StringVarP(&initNodeRequest.LogLevel, "logLevel", "", "info", "The node's log level.")
+	cc.Flags().StringVar(&initNodeRequest.CpuRequest, "cpuRequest", "", "Set the number of milli cores to request for the CPU, e.g. "+
+		"\"100m\" or \"0.1\".")
+	cc.Flags().StringVar(&initNodeRequest.CpuLimit, "cpuLimit", "", "Set the number of milli cores to limit for the CPU, e.g. "+
+		"\"100m\" or \"0.1\".")
+	cc.Flags().StringVar(&initNodeRequest.MemRequest, "memRequest", "", "Set the amount of RAM to request, e.g. "+
+		"\"1GiB\". ")
+	cc.Flags().StringVar(&initNodeRequest.MemLimit, "memLimit", "", "Set the amount of RAM to limit, e.g. "+
+		"\"1GiB\". ")
 
 	return cc
 }

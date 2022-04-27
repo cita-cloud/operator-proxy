@@ -161,6 +161,10 @@ func (a allInOneServer) Create(ctx context.Context, request *pb.AllInOneCreateRe
 			StorageSize:      request.GetStorageSize(),
 			StorageClassName: request.GetStorageClassName(),
 			LogLevel:         request.GetLogLevel(),
+			CpuRequest:       request.GetCpuRequest(),
+			MemRequest:       request.GetMemRequest(),
+			CpuLimit:         request.GetCpuLimit(),
+			MemLimit:         request.GetMemLimit(),
 		}
 		_, err = nodesvc.NewNodeServer().Init(ctx, nodeReq)
 		if err != nil {

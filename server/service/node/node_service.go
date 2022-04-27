@@ -25,6 +25,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	corev1 "k8s.io/api/core/v1"
+	k8sresource "k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/pointer"
 
@@ -54,6 +55,18 @@ func (n nodeServer) Init(ctx context.Context, node *pb.Node) (*pb.NodeSimpleResp
 	nodeCr.Spec.StorageClassName = pointer.String(node.GetStorageClassName())
 	nodeCr.Spec.LogLevel = convertProtoToSpec(node.GetLogLevel())
 	nodeCr.Spec.Action = citacloudv1.NodeInitialize
+
+	if node.GetCpuRequest() != "" || node.GetMemRequest() != "" {
+		nodeCr.Spec.Resources.Requests = corev1.ResourceList{}
+		nodeCr.Spec.Resources.Requests[corev1.ResourceCPU], _ = k8sresource.ParseQuantity(node.GetCpuRequest())
+		nodeCr.Spec.Resources.Requests[corev1.ResourceMemory], _ = k8sresource.ParseQuantity(node.GetMemRequest())
+	}
+
+	if node.GetCpuLimit() != "" || node.GetCpuLimit() != "" {
+		nodeCr.Spec.Resources.Limits = corev1.ResourceList{}
+		nodeCr.Spec.Resources.Limits[corev1.ResourceCPU], _ = k8sresource.ParseQuantity(node.GetCpuLimit())
+		nodeCr.Spec.Resources.Limits[corev1.ResourceMemory], _ = k8sresource.ParseQuantity(node.GetMemLimit())
+	}
 
 	err := kubeapi.K8sClient.Create(ctx, nodeCr)
 	if err != nil {

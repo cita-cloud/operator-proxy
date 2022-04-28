@@ -1,6 +1,6 @@
 # cita-cloud-operator-proxy
 
-![Version: 0.0.2](https://img.shields.io/badge/Version-0.0.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.2](https://img.shields.io/badge/AppVersion-0.0.2-informational?style=flat-square)
+![Version: 0.0.3](https://img.shields.io/badge/Version-0.0.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 6.4.0](https://img.shields.io/badge/AppVersion-6.4.0-informational?style=flat-square)
 
 A Helm chart for Cita-Cloud Operator Proxy
 
@@ -23,7 +23,7 @@ Kubernetes: `>=1.18.0-0`
 | global.registry | string | `"docker.io"` | You can specify the image registry. |
 | global.repository | string | `"citacloud"` | You can specify the image repository. |
 | image.pullPolicy | string | `"IfNotPresent"` | You can specify the image pull policy. |
-| image.tag | string | `"v0.0.2"` | You can specify the image tag. |
+| image.tag | string | `"v0.0.3"` | You can specify the image tag. |
 | replicas | int | `1` | You can specify the replica count. |
 | serviceAccountName | string | `"cita-cloud-operator-proxy-sa"` | You can specify the service account. |
 

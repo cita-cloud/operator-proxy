@@ -122,11 +122,11 @@ func (a allInOneServer) Create(ctx context.Context, request *pb.AllInOneCreateRe
 		nodeAccountNameList = append(nodeAccountNameList, nodeAccountName)
 	}
 	// wait admin account && node account in chain status
-	err = wait.Poll(3*time.Second, 10*time.Second, func() (done bool, err error) {
+	err = wait.Poll(3*time.Second, 30*time.Second, func() (done bool, err error) {
 		return a.checkChainAccount(ctx, request.GetNamespace(), request.GetName(), request.GetNodeCount())
 	})
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to create node account: %v", err)
+		return nil, status.Errorf(codes.Internal, "failed to wait all node account created: %v", err)
 	}
 
 	// set chain online

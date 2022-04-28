@@ -1,7 +1,7 @@
 GO_BUILD = $(GO_CMD) build
 GO_CMD = $(GO_ENV) go
 
-DEV_IMG ?= registry.devops.rivtower.com/cita-cloud/operator/operator-proxy:v0.0.1
+DEV_IMG ?= registry.devops.rivtower.com/cita-cloud/operator/operator-proxy:v0.0.3
 IMG ?= citacloud/operator-proxy
 
 VERSION=$(shell git describe --tags --match 'v*' --always --dirty)

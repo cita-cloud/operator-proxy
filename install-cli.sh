@@ -21,7 +21,7 @@ export REPO=operator-proxy
 export BIN_LOCATION="/usr/local/bin"
 
 #cli_version=$(curl -s https://api.github.com/repos/$OWNER/$REPO/releases/latest | grep 'tag_name' | cut -d '"' -f 4 | tr -d 'v')
-cli_version=0.0.1
+cli_version=0.0.3
 
 function sudocmd(){
     if [ $(whoami) == "root" ]; then

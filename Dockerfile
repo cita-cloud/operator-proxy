@@ -32,5 +32,5 @@ MAINTAINER https://github.com/acechef
 WORKDIR /
 COPY --from=builder /workspace/operator-proxy .
 USER 65532:65532
-#
+
 ENTRYPOINT ["/operator-proxy"]

@@ -2,6 +2,23 @@ apiVersion: v1
 entries:
   cita-cloud-operator-proxy:
   - apiVersion: v2
+    appVersion: 6.4.0
+    created: "2022-05-13T10:16:01.89528284Z"
+    description: A Helm chart for Cita-Cloud Operator Proxy
+    digest: de38d18d051b81f7429e97d84be7f778df5cec2a0b27ef757f18a59e16a7ec01
+    home: https://github.com/cita-cloud/operator-proxy
+    keywords:
+    - cita-cloud
+    kubeVersion: '>=1.18.0-0'
+    maintainers:
+    - email: contact@rivtower.com
+      name: Rivtower Technologies
+    name: cita-cloud-operator-proxy
+    type: application
+    urls:
+    - https://github.com/cita-cloud/operator-proxy/releases/download/helm-chart-cita-cloud-operator-proxy-0.0.3/cita-cloud-operator-proxy-0.0.3.tgz
+    version: 0.0.3
+  - apiVersion: v2
     appVersion: 0.0.2
     created: "2022-04-18T07:55:59.95242749Z"
     description: A Helm chart for Cita-Cloud Operator Proxy
@@ -35,4 +52,4 @@ entries:
     urls:
     - https://github.com/cita-cloud/operator-proxy/releases/download/helm-chart-cita-cloud-operator-proxy-0.0.1/cita-cloud-operator-proxy-0.0.1.tgz
     version: 0.0.1
-generated: "2022-04-18T07:55:59.95243729Z"
+generated: "2022-05-13T10:16:01.895294141Z"
